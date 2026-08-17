@@ -85,6 +85,17 @@ To build for deployment under a sub-path (e.g. `/play/`):
 npm run build -- --base=/play/
 ```
 
+## Deployment
+
+The build output is a folder of static files — no server, no backend. It can be
+hosted anywhere that serves files.
+
+learnspec.org publishes it at `learnspec.org/play/`: the site's own GitHub Pages
+workflow checks this repository out, builds it with `--base=/play/`, and copies
+`dist/` into the site artifact before publishing. This repository therefore has
+no deploy workflow of its own — only CI (typecheck, tests, and a `/play/` build
+so a base-path regression is caught here rather than on the site).
+
 ## Project layout
 
 ```

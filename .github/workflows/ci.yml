@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npx tsc -b
+      - run: npm test
+
+      # Build under the same sub-path learnspec.org serves it from, so a
+      # base-path regression fails here rather than on the site deploy.
+      - run: npm run build -- --base=/play/
