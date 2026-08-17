@@ -8,12 +8,15 @@ import type { DiagramKind } from "../parser/learnmd";
 /** kroki.io diagram type for each LearnMD diagram fence language we render. */
 const KROKI_TYPE: Partial<Record<DiagramKind, string>> = {
   mermaid: "mermaid",
-  tikz: "tikz",
   graphviz: "graphviz",
   plantuml: "plantuml",
   d2: "d2",
   // kroki.io has no generic "latex" diagram type — LaTeX snippets can't be
   // rendered through this path and degrade to a code block instead.
+  // tikz is deliberately absent: the public kroki.io TikZ endpoint currently
+  // rejects even minimal tikzpicture snippets, so advertising it would break
+  // at first use. TikZ fences degrade to a code block; re-add the mapping
+  // here once the endpoint (or a `?kroki=` instance) renders it reliably.
 };
 
 /** Diagram kinds this player renders via a kroki.io `<img>` (excludes mermaid, which uses the JS lib). */
