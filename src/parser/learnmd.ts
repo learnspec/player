@@ -1,0 +1,165 @@
+// Pure LearnMD (.learn.md) segmenter — no DOM access, safe to unit test.
+//
+// LearnMD is standard GFM Markdown plus a handful of special fenced blocks
+// and callouts. Rather than teach `marked` about all of that, this module
+// walks the document once and splits it into an ordered list of typed
+// segments. Each segment is either plain prose (still full Markdown,
+// rendered later by `render/markdown.ts`) or one of the special blocks the
+// player treats differently: `example`, `summary`, `quiz`, or a diagram
+// fence (mermaid/tikz/graphviz/plantuml/d2/latex/...).
+//
+// Callouts (`> [!note]` etc.) are deliberately left inside prose segments —
+// `render/markdown.ts` post-processes the sanitized HTML to style them,
+// since `marked`'s GFM blockquote output is the simplest place to detect
+// the `[!type]` marker.
+
+import { parseFrontmatter } from "./frontmatter";
+import { parseQuestionBlock, type QuizQuestion } from "./quizmd";
+
+export type DiagramKind =
+  | "mermaid"
+  | "tikz"
+  | "graphviz"
+  | "plantuml"
+  | "d2"
+  | "latex";
+
+const DIAGRAM_KINDS: ReadonlySet<string> = new Set([
+  "mermaid",
+  "tikz",
+  "graphviz",
+  "plantuml",
+  "d2",
+  "latex",
+]);
+
+export interface ProseSegment {
+  type: "prose";
+  markdown: string;
+}
+
+export interface ExampleSegment {
+  type: "example" | "summary";
+  markdown: string;
+}
+
+export interface QuizSegment {
+  type: "quiz";
+  question: QuizQuestion;
+}
+
+export interface DiagramSegment {
+  type: "diagram";
+  kind: DiagramKind;
+  source: string;
+}
+
+export interface UnsupportedSegment {
+  type: "unsupported";
+  lang: string;
+  source: string;
+}
+
+export type LearnSegment =
+  | ProseSegment
+  | ExampleSegment
+  | QuizSegment
+  | DiagramSegment
+  | UnsupportedSegment;
+
+export interface LearnDocument {
+  title?: string;
+  description?: string;
+  math: boolean;
+  frontmatter: Record<string, string | number | boolean>;
+  segments: LearnSegment[];
+}
+
+const FENCE_RE = /^(```+|~~~+)\s*([A-Za-z0-9_-]*)\s*$/;
+
+/** Parses a full `.learn.md` document into an ordered list of segments. */
+export function parseLearnMD(source: string): LearnDocument {
+  const { data: frontmatter, body } = parseFrontmatter(source);
+  const lines = body.split(/\r\n|\n/);
+
+  const title = typeof frontmatter.title === "string" ? frontmatter.title : undefined;
+  const description =
+    typeof frontmatter.description === "string" ? frontmatter.description : undefined;
+  const math = frontmatter.math === true || frontmatter.math === "true";
+
+  const segments: LearnSegment[] = [];
+  let proseBuffer: string[] = [];
+
+  const flushProse = () => {
+    const text = proseBuffer.join("\n").trim();
+    if (text) segments.push({ type: "prose", markdown: text });
+    proseBuffer = [];
+  };
+
+  let i = 0;
+  while (i < lines.length) {
+    const fenceMatch = lines[i].match(FENCE_RE);
+    if (!fenceMatch) {
+      proseBuffer.push(lines[i]);
+      i++;
+      continue;
+    }
+
+    const fenceMarker = fenceMatch[1][0].repeat(fenceMatch[1].length);
+    const lang = fenceMatch[2].toLowerCase();
+    const closeRe = new RegExp(`^${fenceMarker[0] === "`" ? "`{3,}" : "~{3,}"}\\s*$`);
+
+    i++;
+    const contentLines: string[] = [];
+    while (i < lines.length && !closeRe.test(lines[i])) {
+      contentLines.push(lines[i]);
+      i++;
+    }
+    i++; // skip closing fence
+    const content = contentLines.join("\n");
+
+    if (lang === "example" || lang === "summary") {
+      flushProse();
+      segments.push({ type: lang, markdown: content });
+    } else if (lang === "quiz") {
+      flushProse();
+      segments.push({ type: "quiz", question: parseQuestionBlock("", contentLines) });
+    } else if (DIAGRAM_KINDS.has(lang)) {
+      flushProse();
+      segments.push({ type: "diagram", kind: lang as DiagramKind, source: content });
+    } else if (lang === "" ) {
+      // Plain, unlabeled fence: keep as ordinary Markdown code block (prose).
+      proseBuffer.push(fenceMatch[0], ...contentLines, fenceMarker);
+    } else {
+      // Any other fenced language (d3, geomap, chess, vega-lite, svg, abc, ...)
+      // and generic code blocks with a language marker are passed through to
+      // `marked` as-is EXCEPT the ones this player explicitly does not
+      // render — those degrade gracefully with a banner.
+      if (isKnownDegradedBlock(lang)) {
+        flushProse();
+        segments.push({ type: "unsupported", lang, source: content });
+      } else {
+        proseBuffer.push(fenceMatch[0], ...contentLines, fenceMarker);
+      }
+    }
+  }
+
+  flushProse();
+
+  return { title, description, math, frontmatter, segments };
+}
+
+const DEGRADED_LANGS = new Set([
+  "d3",
+  "geomap",
+  "chess",
+  "vega-lite",
+  "vega",
+  "svg",
+  "abc",
+  "diagram",
+]);
+
+function isKnownDegradedBlock(lang: string): boolean {
+  return DEGRADED_LANGS.has(lang);
+}
