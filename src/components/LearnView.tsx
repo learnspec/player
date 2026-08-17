@@ -47,7 +47,7 @@ function Segment({ segment, krokiBaseUrl }: { segment: LearnSegment; krokiBaseUr
       return (
         <div class="inline-quiz">
           <QuizPlayer
-            quiz={{ title: "", frontmatter: {}, questions: [segment.question] }}
+            quiz={{ title: "", frontmatter: {}, partialScoring: true, questions: [segment.question] }}
             compact
           />
         </div>

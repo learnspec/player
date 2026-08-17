@@ -1,13 +1,13 @@
 ---
 title: QuizMD demo
 description: A short tour of the QuizMD question types this player supports.
-shuffle: false
+partial_scoring: true
 ---
 
 # QuizMD demo
 
-This quiz exercises single choice, multiple choice, and open answer
-questions, plus per-question hints, explanations, and inline math.
+This quiz exercises all five QuizMD question types — mcq, multi, open,
+match, and order — plus per-question hints, explanations, and inline math.
 
 ## What is the capital of France?
 
@@ -40,9 +40,18 @@ Select all that apply.
 points: 2
 ```
 
+## True or false: $0$ is an even number.
+
+- [x] True
+- [ ] False
+
+> 0 is divisible by 2 with no remainder, so it's even.
+
 ## What is the value of $\int_0^1 x^2 \, dx$?
 
-= 1/3 | one third | 0.333
+Fill in the blank: $\int_0^1 x^2\,dx = $ ___.
+
+**Answer:** 1/3
 
 > $\int_0^1 x^2\,dx = \left[\frac{x^3}{3}\right]_0^1 = \frac{1}{3}$
 
@@ -50,8 +59,27 @@ points: 2
 hint: "Use the power rule for integration: ∫xⁿdx = xⁿ⁺¹/(n+1)."
 ```
 
-## Describe the mechanism shown in the diagram above
+## Match each planet with its position from the Sun.
 
-This question has no checkboxes and no `= answer` line, so it can't be
-answered here — it's shown as an "unsupported question type" warning
-instead of guessing at an answer format.
+```quiz
+type: match
+points: 3
+```
+
+| Planet | Position |
+|--------|----------|
+| Mercury | 1st |
+| Venus | 2nd |
+| Earth | 3rd |
+
+## Place these numbers in ascending order.
+
+```quiz
+type: order
+points: 2
+```
+
+1. One
+2. Two
+3. Three
+4. Four

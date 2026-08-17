@@ -35,11 +35,16 @@ button and, for GitHub URLs, a suggestion to try the jsDelivr mirror
 
 | Block | Behavior |
 | --- | --- |
-| Frontmatter (`title`, `description`, `math`, ...) | Parsed (flat `key: value` pairs only, unknown keys ignored) |
-| `- [ ]` / `- [x]` choices | Rendered as single/multiple choice, graded client-side |
-| `= answer \| alt` line | Rendered as an open-answer input, matched case/diacritic-insensitively |
+| Frontmatter (`title`, `description`, `math`, `partial_scoring`, ...) | Parsed (flat `key: value` pairs only, unknown keys ignored) |
+| `- [ ]` / `- [x]` choices | Rendered as mcq/multi choice, graded client-side |
+| Exactly two `True` / `False` choices | Inferred as `tf`, rendered like an mcq |
+| `___` blank(s) + `**Answer:** value \| value2` | Rendered as one open-answer input per blank, matched case/diacritic-insensitively, each blank graded independently |
+| 2-column Markdown table + `type: match` | Rendered as a `<select>` per row; partial-scored (correct pairs / total pairs) |
+| Numbered list (write order = correct order) + `type: order` | Rendered as a reorderable list (up/down buttons); partial-scored via Kendall's tau |
+| `  > text` (indented under a choice) | Rendered as per-choice feedback, shown only if that choice was selected |
+| `> [!correct]` / `> [!incorrect]` | Rendered as feedback shown only on a correct / incorrect answer |
 | `> ...` trailing blockquote | Rendered as the post-answer explanation |
-| ` ```quiz ` config fence (`points`, `hint`) | Parsed and shown on the question card |
+| ` ```quiz ` config fence (`id`, `type`, `points`, `hint`) | Parsed and shown on the question card |
 | `> [!note]` / `[!tip]` / `[!warning]` / `[!important]` | Rendered as styled callout boxes |
 | ` ```example ` / ` ```summary ` fences | Rendered as styled boxes (content is Markdown) |
 | ` ```quiz ` fence in LearnMD | Rendered as an inline interactive mini-quiz |

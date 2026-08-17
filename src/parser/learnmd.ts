@@ -75,7 +75,11 @@ export interface LearnDocument {
   segments: LearnSegment[];
 }
 
-const FENCE_RE = /^(```+|~~~+)\s*([A-Za-z0-9_-]*)\s*$/;
+// Trailing attributes after the language word (e.g. ` ```quiz scored:true `,
+// ` ```example python title:"..." `) are matched but ignored — this player
+// doesn't act on them, it just needs to still recognize the fence.
+const FENCE_RE = /^(```+|~~~+)\s*([A-Za-z0-9_-]*)(?:\s+.*)?$/;
+const INLINE_QUIZ_QUESTION_RE = /^\s*\?\s*(.*)$/;
 
 /** Parses a full `.learn.md` document into an ordered list of segments. */
 export function parseLearnMD(source: string): LearnDocument {
@@ -123,7 +127,20 @@ export function parseLearnMD(source: string): LearnDocument {
       segments.push({ type: lang, markdown: content });
     } else if (lang === "quiz") {
       flushProse();
-      segments.push({ type: "quiz", question: parseQuestionBlock("", contentLines) });
+      // LearnMD's inline mini-quiz syntax uses `? question text` as its first
+      // line instead of QuizMD's `## Qn` heading — lift it into the title so
+      // it renders like a real question instead of leaking into the prompt.
+      let quizTitle = "";
+      let quizLines = contentLines;
+      const firstNonBlank = contentLines.findIndex((l) => l.trim() !== "");
+      if (firstNonBlank !== -1) {
+        const qm = contentLines[firstNonBlank].match(INLINE_QUIZ_QUESTION_RE);
+        if (qm) {
+          quizTitle = qm[1].trim();
+          quizLines = contentLines.slice(firstNonBlank + 1);
+        }
+      }
+      segments.push({ type: "quiz", question: parseQuestionBlock(quizTitle, quizLines) });
     } else if (DIAGRAM_KINDS.has(lang)) {
       flushProse();
       segments.push({ type: "diagram", kind: lang as DiagramKind, source: content });
