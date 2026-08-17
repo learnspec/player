@@ -80,6 +80,17 @@ const BLOCKQUOTE_RE = /^>\s?(.*)$/;
 const FENCE_START_RE = /^```quiz\s*$/;
 const FENCE_END_RE = /^```\s*$/;
 const ANSWER_RE = /^\*\*Answer:\*\*\s*(.*)$/i;
+
+// The spec's own convention labels headings `## Q3 · Fill in the blank: ...`.
+// The player numbers questions itself, so keeping the label would render
+// "Q3. Q3 · Fill in the blank: ...". Strip it only when text follows, so a
+// bare `## Q3` heading still keeps its label as the visible title.
+const QUESTION_LABEL_RE = /^Q\d+\s*(?:[·.:–—-]\s*)(.+)$/;
+
+function stripQuestionLabel(heading: string): string {
+  const m = heading.match(QUESTION_LABEL_RE);
+  return m ? m[1].trim() : heading;
+}
 const TABLE_ROW_RE = /^\s*\|(.+)\|\s*$/;
 const TABLE_SEPARATOR_RE = /^\s*\|?[\s:|-]+\|?\s*$/;
 const ORDER_ITEM_RE = /^\s*\d+[.)]\s+(.*)$/;
@@ -134,7 +145,7 @@ export function parseQuizMD(source: string): QuizDocument {
       i++;
       continue;
     }
-    const qTitle = headingMatch[1].trim();
+    const qTitle = stripQuestionLabel(headingMatch[1].trim());
     i++;
     const blockLines: string[] = [];
     while (i < lines.length && !HEADING_RE.test(lines[i])) {

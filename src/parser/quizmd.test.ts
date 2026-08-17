@@ -63,6 +63,30 @@ Some intro text.
     ]);
   });
 
+  it("strips the spec's Qn label from a heading so numbering isn't doubled", () => {
+    const doc = parseQuizMD(`# Quiz
+
+## Q1 · How many planets are in our solar system?
+
+- [x] 8
+- [ ] 9
+
+## Q2. What is 2 + 2?
+
+- [x] 4
+- [ ] 5
+
+## Q3
+
+- [x] Yes
+- [ ] No
+`);
+    expect(doc.questions[0].title).toBe("How many planets are in our solar system?");
+    expect(doc.questions[1].title).toBe("What is 2 + 2?");
+    // A bare label is the only visible title there is — keep it.
+    expect(doc.questions[2].title).toBe("Q3");
+  });
+
   it("parses a multi-select question when more than one box is checked", () => {
     const doc = parseQuizMD(`# Quiz
 
