@@ -26,16 +26,18 @@ point. Think of it as many neighbouring rays arriving at once: some are bent
 one way, some the other, and the wobbles average out. The light holds steady.
 
 ```tikz
-\begin{tikzpicture}[scale=1.1]
-  \fill[gray!15] (-0.4,0.9) rectangle (5.4,1.9);
-  \node[gray!70, font=\small] at (2.5,1.4) {turbulent atmosphere};
-  \draw[thick] (0,3) -- (1.6,1.9);
-  \draw[thick] (1.6,1.9) -- (2.4,1.4) -- (3.1,0.9) -- (2.7,0);
-  \draw[thick, dashed, gray] (1.6,1.9) -- (3.4,0);
-  \fill (0,3) circle (0.07) node[above right, font=\small] {star};
-  \fill (2.7,0) circle (0.06);
-  \node[font=\small, anchor=north] at (2.7,-0.1) {eye};
-  \node[gray, font=\small, anchor=north] at (3.6,-0.1) {undeflected path};
+\begin{tikzpicture}[scale=1.05]
+  \fill[gray!12] (-0.5,1.2) rectangle (6.2,2.3);
+  \node[gray!65, font=\small, anchor=west] at (3.5,1.75) {turbulent atmosphere};
+
+  \draw[thick, dashed, gray] (1.3,2.3) -- (4.4,-1.2);
+  \node[gray, font=\small, anchor=west] at (4.5,-1.15) {undeflected path};
+
+  \draw[thick] (0,4) -- (1.3,2.3) -- (1.7,1.85) -- (2.0,1.35) -- (2.5,0.1);
+
+  \fill (0,4) circle (0.07) node[above right, font=\small] {star};
+  \fill (2.5,0.1) circle (0.06);
+  \node[font=\small, anchor=north] at (2.5,0.0) {eye};
 \end{tikzpicture}
 ```
 
