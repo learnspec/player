@@ -11,13 +11,27 @@ const KROKI_TYPE: Partial<Record<DiagramKind, string>> = {
   graphviz: "graphviz",
   plantuml: "plantuml",
   d2: "d2",
-  // kroki.io has no generic "latex" diagram type — LaTeX snippets can't be
-  // rendered through this path and degrade to a code block instead.
-  // tikz is deliberately absent: the public kroki.io TikZ endpoint currently
-  // rejects even minimal tikzpicture snippets, so advertising it would break
-  // at first use. TikZ fences degrade to a code block; re-add the mapping
-  // here once the endpoint (or a `?kroki=` instance) renders it reliably.
+  tikz: "tikz",
+  "vega-lite": "vegalite",
+  // kroki.io has no generic "latex" diagram type — a plain LaTeX snippet has
+  // no equivalent here and degrades to a code block instead.
 };
+
+/**
+ * kroki.io's TikZ backend compiles a *whole LaTeX document*: a bare
+ * `\begin{tikzpicture}` snippet comes back as a 400 with a rendered error
+ * image. Authors write the snippet, so wrap it when no preamble is present.
+ *
+ * Detection is on `\documentclass` rather than on `\begin{document}`, since
+ * that is what actually decides whether the source compiles standalone.
+ */
+export function wrapTikzDocument(source: string): string {
+  if (/\\documentclass/.test(source)) return source;
+  return `\\documentclass[tikz,border=6pt]{standalone}
+\\begin{document}
+${source.trim()}
+\\end{document}`;
+}
 
 /** Diagram kinds this player renders via a kroki.io `<img>` (excludes mermaid, which uses the JS lib). */
 export function isKrokiRenderable(kind: DiagramKind): boolean {
@@ -51,7 +65,7 @@ export function buildKrokiUrl(
 ): string | null {
   const type = KROKI_TYPE[kind];
   if (!type) return null;
-  const payload = encodeKrokiPayload(source);
+  const payload = encodeKrokiPayload(kind === "tikz" ? wrapTikzDocument(source) : source);
   const base = baseUrl.replace(/\/+$/, "");
   return `${base}/${type}/svg/${payload}`;
 }

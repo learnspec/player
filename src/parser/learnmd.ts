@@ -22,6 +22,7 @@ export type DiagramKind =
   | "graphviz"
   | "plantuml"
   | "d2"
+  | "vega-lite"
   | "latex";
 
 const DIAGRAM_KINDS: ReadonlySet<string> = new Set([
@@ -30,6 +31,9 @@ const DIAGRAM_KINDS: ReadonlySet<string> = new Set([
   "graphviz",
   "plantuml",
   "d2",
+  // The spec's fence id is `vega-lite` (DIAGRAMS.md); kroki.io's diagram
+  // type for it is spelled `vegalite`. Mapping lives in render/kroki.ts.
+  "vega-lite",
   "latex",
 ]);
 

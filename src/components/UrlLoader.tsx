@@ -6,6 +6,17 @@ interface UrlLoaderProps {
   initialUrl?: string;
 }
 
+/**
+ * The track demo is several files importing each other, so unlike the
+ * single-file demos it can't be inlined at build time — it ships in
+ * `public/` and goes through the normal `?url=` path. The URL is made
+ * absolute so relative `!import` resolution has a directory to work from.
+ */
+const TRACK_DEMO_URL = new URL(
+  `${import.meta.env.BASE_URL}samples/track-demo/index.track.md`,
+  window.location.href,
+).toString();
+
 export function UrlLoader({ onLoad, onLoadSample, initialUrl }: UrlLoaderProps) {
   const handleSubmit = (event: SubmitEvent) => {
     event.preventDefault();
@@ -18,9 +29,9 @@ export function UrlLoader({ onLoad, onLoadSample, initialUrl }: UrlLoaderProps) 
     <div class="url-loader">
       <h1>LearnSpec Player</h1>
       <p class="tagline">
-        A static, 100% client-side player for <strong>QuizMD</strong> and{" "}
-        <strong>LearnMD</strong> — paste a raw file URL and it renders in your browser,
-        nothing uploaded anywhere.
+        A static, 100% client-side player for <strong>QuizMD</strong>,{" "}
+        <strong>LearnMD</strong> and <strong>TrackMD</strong> — paste a raw file URL and it
+        renders in your browser, nothing uploaded anywhere.
       </p>
 
       <form onSubmit={handleSubmit} class="url-form">
@@ -43,6 +54,9 @@ export function UrlLoader({ onLoad, onLoadSample, initialUrl }: UrlLoaderProps) 
         </button>
         <button type="button" class="btn btn-secondary" onClick={() => onLoadSample("learn")}>
           LearnMD demo
+        </button>
+        <button type="button" class="btn btn-secondary" onClick={() => onLoad(TRACK_DEMO_URL)}>
+          TrackMD demo
         </button>
       </div>
     </div>

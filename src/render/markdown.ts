@@ -40,7 +40,31 @@ function extractMath(markdown: string): { text: string; placeholders: MathPlaceh
   return { text, placeholders };
 }
 
-const CALLOUT_MARKER_RE = /^\s*\[!(note|tip|warning|important)\]\s*/i;
+// Any `[!word]` marker is treated as a callout, not just the eight types
+// LearnMD names (SPEC §Callouts). Matching only the known list meant an
+// unlisted type — `[!concept]`, which the wider ecosystem emits — leaked
+// into the page as literal text. An unknown type gets neutral styling and
+// its own name as the label: the player doesn't invent semantics it hasn't
+// been told, but it never shows the reader raw markup either.
+const CALLOUT_MARKER_RE = /^\s*\[!([a-z][a-z0-9-]*)\]\s*/i;
+
+/** Types with a dedicated palette in index.css; others fall back to neutral. */
+const STYLED_CALLOUTS: ReadonlySet<string> = new Set([
+  "note",
+  "tip",
+  "warning",
+  "important",
+  "caution",
+  "summary",
+  "example",
+  "objectives",
+]);
+
+/** Display label per callout type — the rest are just capitalised. */
+const CALLOUT_LABEL: Record<string, string> = {
+  objectives: "Learning objectives",
+  todo: "To do",
+};
 
 /** Detects `> [!note]`-style GFM callouts and adds styling hooks. */
 function applyCalloutStyling(html: string): string {
@@ -56,11 +80,11 @@ function applyCalloutStyling(html: string): string {
 
     const kind = match[1].toLowerCase();
     firstP.innerHTML = firstP.innerHTML.slice(match[0].length);
-    bq.classList.add("callout", `callout-${kind}`);
+    bq.classList.add("callout", STYLED_CALLOUTS.has(kind) ? `callout-${kind}` : "callout-generic");
 
     const label = document.createElement("div");
     label.className = "callout-label";
-    label.textContent = kind.charAt(0).toUpperCase() + kind.slice(1);
+    label.textContent = CALLOUT_LABEL[kind] ?? kind.charAt(0).toUpperCase() + kind.slice(1);
     bq.insertBefore(label, bq.firstChild);
   });
 

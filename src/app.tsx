@@ -1,66 +1,50 @@
 import { useEffect, useState } from "preact/hooks";
+import { DocView } from "./components/DocView";
+import { FlashDeckView } from "./components/FlashDeckView";
 import { LearnView } from "./components/LearnView";
+import { NuggetView } from "./components/NuggetView";
 import { QuizPlayer } from "./components/QuizPlayer";
+import { TrackView } from "./components/TrackView";
 import { UrlLoader } from "./components/UrlLoader";
+import { parseFlashMD } from "./parser/flashmd";
 import { parseLearnMD } from "./parser/learnmd";
+import { parseNuggetMD } from "./parser/nuggetmd";
 import { parseQuizMD } from "./parser/quizmd";
+import { looksLikeTrack, parseTrackMD, type StepKind, type TrackDocument } from "./parser/trackmd";
 import {
   detectFormatFromContent,
   detectFormatFromUrl,
-  extractGistContent,
-  resolveContentUrl,
+  resolveRelativeUrl,
 } from "./lib/resolve";
+import { fetchContentCached } from "./lib/contentCache";
 
 import demoQuizMd from "../samples/demo.quiz.md?raw";
 import demoLearnMd from "../samples/demo.learn.md?raw";
 
+/**
+ * Set while the learner is inside a track, so every step view can offer
+ * "back to the track" and prev/next without refetching the track file.
+ */
+interface TrackNav {
+  doc: TrackDocument;
+  /** URL the track itself was loaded from — the base for relative imports. */
+  url: string;
+  stepIndex: number;
+}
+
 type AppState =
   | { view: "home" }
-  | { view: "loading"; url: string }
-  | { view: "error"; url: string; message: string }
-  | { view: "quiz"; source: string }
-  | { view: "learn"; source: string };
+  | { view: "loading"; url: string; nav?: TrackNav }
+  | { view: "error"; url: string; message: string; nav?: TrackNav }
+  | { view: "quiz"; source: string; nav?: TrackNav }
+  | { view: "learn"; source: string; nav?: TrackNav }
+  | { view: "flash"; source: string; nav?: TrackNav }
+  | { view: "nugget"; source: string; nav?: TrackNav }
+  | { view: "doc"; source: string; kind: StepKind; label: string; nav?: TrackNav }
+  | { view: "track"; doc: TrackDocument; url: string };
 
 function getQueryParam(name: string): string | null {
   return new URLSearchParams(window.location.search).get(name);
-}
-
-async function fetchContent(url: string): Promise<string> {
-  const resolved = resolveContentUrl(url);
-
-  try {
-    const res = await fetch(resolved.primary, { headers: { Accept: "text/plain, */*" } });
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status} ${res.statusText}`);
-    }
-    if (resolved.primary.includes("api.github.com/gists/")) {
-      const json = await res.json();
-      const content = extractGistContent(json);
-      if (!content) throw new Error("No matching file found in this Gist.");
-      return content;
-    }
-    return await res.text();
-  } catch (primaryError) {
-    if (resolved.fallback) {
-      try {
-        const res = await fetch(resolved.fallback);
-        if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-        return await res.text();
-      } catch (fallbackError) {
-        throw new Error(
-          `Could not fetch from the original URL (${
-            primaryError instanceof Error ? primaryError.message : String(primaryError)
-          }), and the jsDelivr fallback also failed (${
-            fallbackError instanceof Error ? fallbackError.message : String(fallbackError)
-          }).`,
-        );
-      }
-    }
-    const reason = primaryError instanceof Error ? primaryError.message : String(primaryError);
-    const hint =
-      " This can happen with CORS restrictions, a 404, or GitHub rate-limiting. If this is a GitHub file, try the jsDelivr mirror instead: https://cdn.jsdelivr.net/gh/OWNER/REPO@REF/PATH";
-    throw new Error(`Failed to fetch ${resolved.primary}: ${reason}.${hint}`);
-  }
 }
 
 export function App() {
@@ -70,7 +54,22 @@ export function App() {
   const loadUrl = async (url: string) => {
     setState({ view: "loading", url });
     try {
-      const content = await fetchContent(url);
+      const content = await fetchContentCached(url);
+
+      const path = url.split(/[?#]/)[0];
+      if (path.endsWith(".track.md") || looksLikeTrack(content)) {
+        setState({ view: "track", doc: parseTrackMD(content), url });
+        return;
+      }
+      if (path.endsWith(".flash.md")) {
+        setState({ view: "flash", source: content });
+        return;
+      }
+      if (path.endsWith(".nugget.md")) {
+        setState({ view: "nugget", source: content });
+        return;
+      }
+
       const urlFormat = detectFormatFromUrl(url);
       const format =
         url.endsWith(".quiz.md") || url.endsWith(".learn.md")
@@ -88,6 +87,48 @@ export function App() {
     }
   };
 
+  const openStep = async (doc: TrackDocument, trackUrl: string, stepIndex: number) => {
+    const step = doc.steps[stepIndex];
+    if (!step) return;
+
+    const nav: TrackNav = { doc, url: trackUrl, stepIndex };
+    const target = resolveRelativeUrl(trackUrl, step.path);
+    if (!target) {
+      setState({
+        view: "error",
+        url: step.path,
+        message: `Can't resolve ${step.path} against ${trackUrl}.`,
+        nav,
+      });
+      return;
+    }
+
+    setState({ view: "loading", url: target, nav });
+    try {
+      const content = await fetchContentCached(target);
+      if (step.kind === "quiz") {
+        setState({ view: "quiz", source: content, nav });
+      } else if (step.kind === "learn") {
+        setState({ view: "learn", source: content, nav });
+      } else if (step.kind === "flash") {
+        setState({ view: "flash", source: content, nav });
+      } else if (step.kind === "nugget") {
+        setState({ view: "nugget", source: content, nav });
+      } else {
+        setState({ view: "doc", source: content, kind: step.kind, label: step.label, nav });
+      }
+    } catch (err) {
+      setState({
+        view: "error",
+        url: target,
+        message: err instanceof Error ? err.message : String(err),
+        nav,
+      });
+    }
+  };
+
+  const backToTrack = (nav: TrackNav) => setState({ view: "track", doc: nav.doc, url: nav.url });
+
   const loadSample = (name: "quiz" | "learn") => {
     setState(
       name === "quiz" ? { view: "quiz", source: demoQuizMd } : { view: "learn", source: demoLearnMd },
@@ -100,9 +141,22 @@ export function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const nav = state.view === "track" ? undefined : state.view === "home" ? undefined : state.nav;
+
   return (
     <div class="app">
-      <div class="app-content">{renderBody(state, loadUrl, loadSample, krokiBaseUrl)}</div>
+      {nav && (
+        <TrackBar
+          nav={nav}
+          onBack={() => backToTrack(nav)}
+          onGo={(index) => openStep(nav.doc, nav.url, index)}
+        />
+      )}
+      {/* The view name drives the column width: a table of contents wants
+          more room than running prose, prose wants a readable measure. */}
+      <div class={`app-content app-content-${state.view}`}>
+        {renderBody(state, loadUrl, loadSample, openStep, krokiBaseUrl)}
+      </div>
       <footer class="app-footer">
         <a href="https://learnspec.org" target="_blank" rel="noreferrer">
           learnspec.org
@@ -116,10 +170,54 @@ export function App() {
   );
 }
 
+function TrackBar({
+  nav,
+  onBack,
+  onGo,
+}: {
+  nav: TrackNav;
+  onBack: () => void;
+  onGo: (index: number) => void;
+}) {
+  const total = nav.doc.steps.length;
+  const hasPrev = nav.stepIndex > 0;
+  const hasNext = nav.stepIndex < total - 1;
+
+  return (
+    <nav class="track-bar">
+      <button type="button" class="btn btn-secondary btn-small" onClick={onBack}>
+        ← {nav.doc.title}
+      </button>
+      <span class="track-bar-position">
+        Step {nav.stepIndex + 1} of {total}
+      </span>
+      <span class="track-bar-actions">
+        <button
+          type="button"
+          class="btn btn-secondary btn-small"
+          disabled={!hasPrev}
+          onClick={() => onGo(nav.stepIndex - 1)}
+        >
+          Previous
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary btn-small"
+          disabled={!hasNext}
+          onClick={() => onGo(nav.stepIndex + 1)}
+        >
+          Next
+        </button>
+      </span>
+    </nav>
+  );
+}
+
 function renderBody(
   state: AppState,
   loadUrl: (url: string) => void,
   loadSample: (name: "quiz" | "learn") => void,
+  openStep: (doc: TrackDocument, trackUrl: string, stepIndex: number) => void,
   krokiBaseUrl: string | undefined,
 ) {
   switch (state.view) {
@@ -136,7 +234,15 @@ function renderBody(
         <div class="status-panel status-error">
           <h2>Couldn't load this file</h2>
           <p>{state.message}</p>
-          <button type="button" class="btn btn-secondary" onClick={() => loadUrl(state.url)}>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            onClick={() =>
+              state.nav
+                ? openStep(state.nav.doc, state.nav.url, state.nav.stepIndex)
+                : loadUrl(state.url)
+            }
+          >
             Retry
           </button>
         </div>
@@ -148,6 +254,32 @@ function renderBody(
     case "learn": {
       const doc = parseLearnMD(state.source);
       return <LearnView doc={doc} krokiBaseUrl={krokiBaseUrl} />;
+    }
+    case "flash":
+      return <FlashDeckView doc={parseFlashMD(state.source)} />;
+    case "nugget":
+      return <NuggetView doc={parseNuggetMD(state.source)} />;
+    case "doc":
+      return <DocView source={state.source} kind={state.kind} fallbackTitle={state.label} />;
+    case "track": {
+      // A track loaded from a Gist has no directory to resolve `./x.learn.md`
+      // against, so it renders as a read-only syllabus rather than pretending
+      // its steps are openable.
+      const resolvable = resolveRelativeUrl(state.url, "./probe.learn.md") !== null;
+      return (
+        <TrackView
+          doc={state.doc}
+          url={state.url}
+          onOpenStep={
+            resolvable ? (index) => openStep(state.doc, state.url, index) : undefined
+          }
+          unresolvableReason={
+            resolvable
+              ? undefined
+              : "This track's steps can't be opened from here: relative imports need a file URL with a directory (a raw GitHub or blob URL works; a Gist does not)."
+          }
+        />
+      );
     }
   }
 }

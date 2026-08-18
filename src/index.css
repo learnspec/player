@@ -1,6 +1,6 @@
 /* LearnSpec Player — single hand-written stylesheet, no CSS framework.
-   System fonts, ~46rem centered column, light + dark via
-   prefers-color-scheme. */
+   System fonts, a centered column whose width is set per view (see
+   `.app-content-*`), light + dark via prefers-color-scheme. */
 
 :root {
   --text: #33313a;
@@ -27,6 +27,10 @@
 
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", monospace;
+
+  --shadow-sm: 0 1px 2px rgb(16 14 24 / 6%);
+  --shadow-md: 0 6px 18px -8px rgb(16 14 24 / 22%);
+  --radius: 10px;
 
   color-scheme: light dark;
   font: 16px/1.6 var(--sans);
@@ -59,6 +63,10 @@
     --warning-border: #d6a900;
     --important-bg: #241a38;
     --important-border: #a675ff;
+
+    /* Shadows read as smudges on a dark ground — lean on borders instead. */
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%);
+    --shadow-md: 0 8px 24px -12px rgb(0 0 0 / 60%);
   }
 }
 
@@ -85,9 +93,36 @@ body {
 .app-content {
   flex: 1;
   width: 100%;
-  max-width: 46rem;
+  /* Default: running prose. Wide enough to breathe, short enough to read. */
+  max-width: 54rem;
   margin: 0 auto;
-  padding: 2.5rem 1.25rem 3rem;
+  padding: 3rem 1.5rem 4rem;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+}
+
+/* A table of contents is a list of short rows, so it takes the extra room. */
+.app-content-track {
+  max-width: 62rem;
+}
+
+/* Quiz cards hold tables and choice grids — wider than prose, not by much. */
+.app-content-quiz {
+  max-width: 58rem;
+}
+
+/* The home screen is a headline and one field: centering beats width. */
+.app-content-home,
+.app-content-loading,
+.app-content-error {
+  max-width: 46rem;
+}
+
+@media (max-width: 40rem) {
+  .app-content {
+    padding: 1.75rem 1rem 3rem;
+    font-size: 1rem;
+  }
 }
 
 .app-footer {
@@ -113,19 +148,25 @@ h4 {
 }
 
 h1 {
-  font-size: 2rem;
-  letter-spacing: -0.02em;
+  font-size: clamp(1.9rem, 1.4rem + 1.6vw, 2.5rem);
+  letter-spacing: -0.025em;
   margin: 0 0 0.75rem;
 }
 
 h2 {
-  font-size: 1.4rem;
-  margin: 2rem 0 0.75rem;
+  font-size: 1.45rem;
+  letter-spacing: -0.015em;
+  margin: 2.5rem 0 0.85rem;
 }
 
 h3 {
   font-size: 1.15rem;
-  margin: 1.5rem 0 0.5rem;
+  margin: 1.75rem 0 0.5rem;
+}
+
+/* An h2 opening a document shouldn't push itself away from the header. */
+:is(.learn, .doc-view, .track) > :is(h2, h3):first-child {
+  margin-top: 0;
 }
 
 p {
@@ -152,29 +193,40 @@ code {
 
 pre {
   background: var(--code-bg);
-  border-radius: 8px;
-  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.15rem;
   overflow-x: auto;
+  font-size: 0.9rem;
+  line-height: 1.55;
 }
 
 pre code {
   background: none;
   padding: 0;
+  font-size: inherit;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  margin: 0 0 1rem;
+  margin: 0 0 1.25rem;
   display: block;
   overflow-x: auto;
+  font-size: 0.95rem;
 }
 
 th,
 td {
   border: 1px solid var(--border);
-  padding: 0.5rem 0.75rem;
+  padding: 0.6rem 0.85rem;
   text-align: left;
+}
+
+th {
+  background: var(--code-bg);
+  font-weight: 600;
+  color: var(--text-h);
 }
 
 blockquote {
@@ -193,21 +245,35 @@ blockquote {
   padding: 0.6rem 1.2rem;
   border: 1px solid transparent;
   cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    filter 0.15s ease;
 }
 
 .btn-primary {
   background: var(--accent);
   color: var(--accent-contrast);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.08);
 }
 
 .btn-secondary {
-  background: transparent;
+  background: var(--bg-raised);
   border-color: var(--border);
   color: var(--text);
 }
 
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -220,19 +286,44 @@ input[type="text"] {
   background: var(--bg-raised);
   color: var(--text);
   width: 100%;
+  transition: border-color 0.15s ease;
+}
+
+input[type="url"]:focus,
+input[type="text"]:focus {
+  border-color: var(--accent);
+}
+
+/* One visible focus ring for every interactive element, keyboard only. */
+:is(button, a, input, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
 
 /* --- Home screen ------------------------------------------------------ */
 
 .url-loader {
   text-align: center;
-  padding-top: 2rem;
+  padding-top: 3rem;
+}
+
+.url-loader h1 {
+  margin-bottom: 1rem;
 }
 
 .tagline {
   color: var(--text-muted);
   max-width: 34rem;
-  margin: 0 auto 2rem;
+  margin: 0 auto 2.25rem;
+  text-wrap: balance;
 }
 
 .url-form {
@@ -318,6 +409,43 @@ blockquote.callout-important .callout-label {
   color: var(--important-border);
 }
 
+/* `caution` shares the warning palette — same "watch out" register. */
+blockquote.callout-caution {
+  background: var(--warning-bg);
+  border-color: var(--incorrect);
+}
+blockquote.callout-caution .callout-label {
+  color: var(--incorrect);
+}
+
+blockquote.callout-summary,
+blockquote.callout-example {
+  background: var(--code-bg);
+  border-color: var(--text-muted);
+}
+blockquote.callout-summary .callout-label,
+blockquote.callout-example .callout-label {
+  color: var(--text-muted);
+}
+
+blockquote.callout-objectives {
+  background: var(--important-bg);
+  border-color: var(--accent);
+}
+blockquote.callout-objectives .callout-label {
+  color: var(--accent);
+}
+
+/* A callout type the spec doesn't name: styled, but neutrally — the player
+   shouldn't imply a semantic it was never given. */
+blockquote.callout-generic {
+  background: var(--bg-raised);
+  border-color: var(--border);
+}
+blockquote.callout-generic .callout-label {
+  color: var(--text-muted);
+}
+
 /* --- Example / summary boxes -------------------------------------------- */
 
 .box {
@@ -351,19 +479,31 @@ blockquote.callout-important .callout-label {
 
 /* --- Diagrams & unsupported blocks ---------------------------------- */
 
+/* Diagrams sit in their own framed panel: many render as dark-on-transparent
+   SVG, which needs a stable ground of its own rather than the page's. */
 .diagram {
-  margin: 0 0 1.25rem;
+  margin: 0 0 1.5rem;
+  padding: 1.25rem;
   text-align: center;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-x: auto;
 }
 
 .diagram-kroki img {
   max-width: 100%;
 }
 
+.diagram-mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
 .unsupported-block {
-  margin: 0 0 1.25rem;
+  margin: 0 0 1.5rem;
   border: 1px dashed var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius);
   overflow: hidden;
 }
 
@@ -382,13 +522,22 @@ blockquote.callout-important .callout-label {
 
 /* --- Learn header ------------------------------------------------------- */
 
-.learn-header {
-  margin-bottom: 2rem;
+.learn-header,
+.quiz-header {
+  margin-bottom: 2.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.learn-header h1,
+.quiz-header h1 {
+  text-wrap: balance;
 }
 
 .learn-description {
   color: var(--text-muted);
   font-size: 1.05rem;
+  margin-bottom: 0;
 }
 
 .inline-quiz {
@@ -401,20 +550,24 @@ blockquote.callout-important .callout-label {
 
 /* --- Quiz --------------------------------------------------------------- */
 
-.quiz-header {
-  margin-bottom: 2rem;
-}
-
 .quiz-description {
   color: var(--text-muted);
+  margin-bottom: 0;
 }
 
 .question {
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius);
+  padding: 1.5rem 1.75rem;
   margin: 0 0 1.25rem;
   background: var(--bg-raised);
+  box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 40rem) {
+  .question {
+    padding: 1.15rem 1rem;
+  }
 }
 
 .question-correct {
@@ -476,10 +629,23 @@ blockquote.callout-important .callout-label {
   display: flex;
   align-items: flex-start;
   gap: 0.6rem;
-  padding: 0.55rem 0.75rem;
+  padding: 0.7rem 0.9rem;
   border: 1px solid var(--border);
   border-radius: 8px;
   cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.choice:hover {
+  border-color: var(--accent);
+}
+
+/* Once answered, the choices are a result readout, not a control. */
+.choice-correct:hover,
+.choice-incorrect:hover {
+  border-color: inherit;
 }
 
 .choice input {
@@ -701,4 +867,424 @@ blockquote.callout-important .callout-label {
   align-items: center;
   gap: 1rem;
   font-size: 1.05rem;
+}
+
+/* --- TrackMD: table of contents + step navigation ---------------------- */
+
+.track-header {
+  margin-bottom: 2.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.track-header h1 {
+  text-wrap: balance;
+}
+
+.track-kicker {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.35rem;
+}
+
+.track-description {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  margin: 0.5rem 0 0;
+}
+
+.track-meta {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin: 0.75rem 0 0;
+}
+
+.track-intro {
+  margin-bottom: 2rem;
+}
+
+.track-notice {
+  background: var(--note-bg);
+  border-left: 3px solid var(--note-border);
+  padding: 0.75rem 1rem;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.9rem;
+}
+
+.track-section {
+  margin-bottom: 2.5rem;
+}
+
+.track-section h2 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.track-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.track-step {
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.track-step:hover:not(.track-step-static) {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.track-step:hover:not(.track-step-static) .step-label {
+  color: var(--accent);
+}
+
+.track-step-static {
+  cursor: default;
+  box-shadow: none;
+  opacity: 0.75;
+}
+
+.step-kind {
+  flex: none;
+  /* Fixed width keeps the labels in a single column down the list. */
+  min-width: 5.5rem;
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.2rem 0.5rem;
+}
+
+.step-kind-learn {
+  color: var(--note-border);
+  border-color: var(--note-border);
+}
+
+.step-kind-quiz {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.step-label {
+  flex: 1;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.step-flag {
+  flex: none;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--code-bg);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+}
+
+/* A checkpoint is a milestone between steps, so it reads as a rule with a
+   marker rather than another row you could click. */
+.track-checkpoint {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.track-checkpoint::after {
+  content: "";
+  flex: 1;
+  border-top: 1px dashed var(--border);
+}
+
+.track-checkpoint-marker {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  flex: none;
+}
+
+.track-refs h2 {
+  font-size: 0.95rem;
+}
+
+.track-refs ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.track-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1.25rem;
+  background: color-mix(in srgb, var(--bg-raised) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+
+/* The track title can be long; it truncates rather than wrapping the bar. */
+.track-bar > .btn:first-child {
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 40rem) {
+  .track-bar-position {
+    display: none;
+  }
+
+  .track-bar > .btn:first-child {
+    max-width: none;
+    flex: 1;
+  }
+}
+
+.track-bar-position {
+  flex: 1;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.track-bar-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.btn-small {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+.doc-notice {
+  background: var(--warning-bg);
+  border-left: 3px solid var(--warning-border);
+  padding: 0.75rem 1rem;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+/* A step label still showing its filename fallback while the real title is
+   being read. Dimming it makes the swap read as "this resolved" rather than
+   as text changing under the reader for no reason — which is why there is no
+   progress bar: the state belongs on the label, not in a separate widget. */
+.step-label-provisional {
+  opacity: 0.5;
+}
+
+/* --- FlashMD: card review ------------------------------------------------ */
+
+.flash-deck {
+  max-width: 34rem;
+  margin: 0 auto;
+}
+
+.flash-progress {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.flash-card {
+  position: relative;
+  min-height: 14rem;
+  padding: 2rem 1.75rem;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.flash-card:not(.flash-card-flipped):hover {
+  border-color: var(--accent);
+}
+
+.flash-card-front {
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.flash-card-front .markdown-body > :last-child {
+  margin-bottom: 0;
+}
+
+.flash-card-divider {
+  border-top: 1px dashed var(--border);
+  margin: 1.5rem 0;
+}
+
+.flash-card-back {
+  font-size: 1.05rem;
+}
+
+.flash-card-back .markdown-body > :last-child {
+  margin-bottom: 0;
+}
+
+.flash-card-tap-hint {
+  position: absolute;
+  bottom: 0.85rem;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.flash-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.flash-hint {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-top: 0.75rem;
+}
+
+.flash-tags {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0;
+  margin: 1.5rem 0 0;
+}
+
+.flash-tags li {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--code-bg);
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+}
+
+/* --- NuggetMD: expandable concept list ----------------------------------- */
+
+.nugget-deck {
+  max-width: 42rem;
+  margin: 0 auto;
+}
+
+.nugget-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  margin-bottom: 0.85rem;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.nugget-card-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font: inherit;
+  font-weight: 600;
+  color: var(--text-h);
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 1rem 1.25rem;
+}
+
+.nugget-card-chevron {
+  flex: none;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-right: 2px solid var(--text-muted);
+  border-bottom: 2px solid var(--text-muted);
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+
+.nugget-card-open .nugget-card-chevron {
+  transform: rotate(45deg);
+}
+
+.nugget-card-title {
+  flex: 1;
+}
+
+.nugget-card-body {
+  padding: 0 1.25rem 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.nugget-section {
+  padding-top: 1.1rem;
+}
+
+.nugget-section-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 0.5rem;
+}
+
+.nugget-check .quiz-compact .question {
+  border-radius: 8px;
+  box-shadow: none;
 }

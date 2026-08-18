@@ -4,7 +4,49 @@ import {
   detectFormatFromUrl,
   extractGistContent,
   resolveContentUrl,
+  resolveRelativeUrl,
 } from "./resolve";
+
+describe("resolveRelativeUrl", () => {
+  it("resolves a sibling path against a raw GitHub track URL", () => {
+    expect(
+      resolveRelativeUrl(
+        "https://raw.githubusercontent.com/learnspec/corpus/main/maths-5e/index.track.md",
+        "./fractions.learn.md",
+      ),
+    ).toBe("https://raw.githubusercontent.com/learnspec/corpus/main/maths-5e/fractions.learn.md");
+  });
+
+  it("keeps a blob URL on github.com so it can be rewritten downstream", () => {
+    expect(
+      resolveRelativeUrl(
+        "https://github.com/learnspec/corpus/blob/main/maths-5e/index.track.md",
+        "./quiz.quiz.md",
+      ),
+    ).toBe("https://github.com/learnspec/corpus/blob/main/maths-5e/quiz.quiz.md");
+  });
+
+  it("handles a parent-directory path", () => {
+    expect(
+      resolveRelativeUrl("https://example.com/a/b/index.track.md", "../shared/intro.learn.md"),
+    ).toBe("https://example.com/a/shared/intro.learn.md");
+  });
+
+  it("passes an absolute URL through untouched", () => {
+    expect(
+      resolveRelativeUrl("https://example.com/t.track.md", "https://other.test/x.quiz.md"),
+    ).toBe("https://other.test/x.quiz.md");
+  });
+
+  it("returns null for a Gist base, which has no directory structure", () => {
+    expect(resolveRelativeUrl("https://api.github.com/gists/abc123", "./a.learn.md")).toBeNull();
+    expect(resolveRelativeUrl("https://gist.github.com/someone/abc123", "./a.learn.md")).toBeNull();
+  });
+
+  it("returns null when the base URL is not a URL at all", () => {
+    expect(resolveRelativeUrl("not a url", "./a.learn.md")).toBeNull();
+  });
+});
 
 describe("resolveContentUrl", () => {
   it("rewrites a github.com blob URL to raw.githubusercontent.com, with a jsDelivr fallback", () => {
