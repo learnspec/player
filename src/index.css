@@ -1118,3 +1118,173 @@ blockquote.callout-generic .callout-label {
 .step-label-provisional {
   opacity: 0.5;
 }
+
+/* --- FlashMD: card review ------------------------------------------------ */
+
+.flash-deck {
+  max-width: 34rem;
+  margin: 0 auto;
+}
+
+.flash-progress {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.flash-card {
+  position: relative;
+  min-height: 14rem;
+  padding: 2rem 1.75rem;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.flash-card:not(.flash-card-flipped):hover {
+  border-color: var(--accent);
+}
+
+.flash-card-front {
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.flash-card-front .markdown-body > :last-child {
+  margin-bottom: 0;
+}
+
+.flash-card-divider {
+  border-top: 1px dashed var(--border);
+  margin: 1.5rem 0;
+}
+
+.flash-card-back {
+  font-size: 1.05rem;
+}
+
+.flash-card-back .markdown-body > :last-child {
+  margin-bottom: 0;
+}
+
+.flash-card-tap-hint {
+  position: absolute;
+  bottom: 0.85rem;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.flash-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.flash-hint {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-top: 0.75rem;
+}
+
+.flash-tags {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0;
+  margin: 1.5rem 0 0;
+}
+
+.flash-tags li {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--code-bg);
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+}
+
+/* --- NuggetMD: expandable concept list ----------------------------------- */
+
+.nugget-deck {
+  max-width: 42rem;
+  margin: 0 auto;
+}
+
+.nugget-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  margin-bottom: 0.85rem;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.nugget-card-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font: inherit;
+  font-weight: 600;
+  color: var(--text-h);
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 1rem 1.25rem;
+}
+
+.nugget-card-chevron {
+  flex: none;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-right: 2px solid var(--text-muted);
+  border-bottom: 2px solid var(--text-muted);
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+
+.nugget-card-open .nugget-card-chevron {
+  transform: rotate(45deg);
+}
+
+.nugget-card-title {
+  flex: 1;
+}
+
+.nugget-card-body {
+  padding: 0 1.25rem 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.nugget-section {
+  padding-top: 1.1rem;
+}
+
+.nugget-section-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 0.5rem;
+}
+
+.nugget-check .quiz-compact .question {
+  border-radius: 8px;
+  box-shadow: none;
+}

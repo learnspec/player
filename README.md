@@ -1,7 +1,7 @@
 # LearnSpec Player
 
 Static, 100% client-side player for LearnSpec formats (QuizMD, LearnMD,
-TrackMD).
+TrackMD, FlashMD, NuggetMD).
 
 Paste a raw file URL and it renders in your browser — nothing is uploaded
 anywhere, there is no backend. The whole app is a static bundle you can host
@@ -11,7 +11,7 @@ on any static file server or CDN.
 
 Open the app and either:
 
-- paste a URL to a `.quiz.md`, `.learn.md` or `.track.md` file, or
+- paste a URL to a `.quiz.md`, `.learn.md`, `.track.md`, `.flash.md` or `.nugget.md` file, or
 - click one of the "try a sample" buttons, or
 - load a file directly via a query string: `?url=<url-encoded file URL>`
 
@@ -23,11 +23,13 @@ Open the app and either:
 - a `gist.github.com/...` page URL (resolved through the GitHub Gist API)
 - any other URL that serves the file directly with permissive CORS headers
 
-If a URL doesn't end in `.quiz.md`, `.learn.md` or `.track.md`, the format
-is guessed from the content: a file containing `!import` directives is
-treated as TrackMD; a `## ` question section containing a `- [ ]` / `- [x]`
-checkbox choice is treated as QuizMD; otherwise the file is treated as
-LearnMD.
+If a URL doesn't end in `.quiz.md`, `.learn.md`, `.track.md`, `.flash.md` or
+`.nugget.md`, the format is guessed from the content: a file containing
+`!import` directives is treated as TrackMD; a `## ` question section
+containing a `- [ ]` / `- [x]` checkbox choice is treated as QuizMD;
+otherwise the file is treated as LearnMD. FlashMD and NuggetMD are only
+detected by extension — their fenced-block syntax is closer to LearnMD's
+than QuizMD's, so a content sniff would be unreliable.
 
 Fetch errors (CORS, 404, GitHub rate-limiting, ...) are shown with a retry
 button and, for GitHub URLs, a suggestion to try the jsDelivr mirror
@@ -59,6 +61,26 @@ deliberately implements none of them. Nothing is persisted between steps.
 Relative imports need a URL with a directory to resolve against. A raw or
 `blob` GitHub URL works; a Gist does not, so a track loaded from a Gist
 renders as a read-only syllabus.
+
+## Flashcards and nuggets
+
+`.flash.md` opens as a one-card-at-a-time review: front, then back on tap
+(or Enter/Space), Previous/Next, an optional per-card hint. A card with
+multiple front variants (`===`-separated) rotates through them round-robin
+across the deck rather than always showing the first — the deck-wide
+approximation of the spec's "coverage over time" without any persistence
+between sessions. There is no spaced-repetition scheduling: this is a
+straight pass through the deck as authored, not FSRS.
+
+`.nugget.md` opens as an expandable list, one entry per `## ` heading. The
+first nugget starts open, the rest collapsed. Concept and Why it matters
+render as written; when the third `### ` section parses as a question (a
+line of prose followed by `- [ ]` / `- [x]` choices — the spec's `?` marker
+is recognised but not required, the same leniency LearnMD's own inline
+quizzes already get) it renders as an interactive recall check, reusing the
+QuizMD question component; otherwise the section still renders as plain
+text rather than disappearing. A fourth or later `### ` section, which the
+spec gives no role, renders after the rest.
 
 ## Supported blocks vs. graceful degradation
 
@@ -146,7 +168,11 @@ src/
   render/kroki.ts         # kroki.io payload encoding
   components/             # Preact components (QuizPlayer, LearnView, UrlLoader, ...)
   parser/trackmd.ts       # TrackMD parser (sections, !import/!ref/!checkpoint)
+  parser/flashmd.ts        # FlashMD parser (cards, front variants, lesson refs)
+  parser/nuggetmd.ts       # NuggetMD parser (positional ###, Check reuses quizmd.ts)
+  parser/attrs.ts          # shared `key:value key2:[a,b]` fence-attribute parser
   lib/resolve.ts           # URL rewriting (GitHub blob/raw, Gist, jsDelivr) + relative imports
+  lib/contentCache.ts      # dedupes fetches shared by the title pass and step navigation
 samples/                   # demo .quiz.md / .learn.md files inlined into the bundle
 public/samples/track-demo/ # multi-file TrackMD demo, served as static files
 ```

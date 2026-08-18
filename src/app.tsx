@@ -1,10 +1,14 @@
 import { useEffect, useState } from "preact/hooks";
 import { DocView } from "./components/DocView";
+import { FlashDeckView } from "./components/FlashDeckView";
 import { LearnView } from "./components/LearnView";
+import { NuggetView } from "./components/NuggetView";
 import { QuizPlayer } from "./components/QuizPlayer";
 import { TrackView } from "./components/TrackView";
 import { UrlLoader } from "./components/UrlLoader";
+import { parseFlashMD } from "./parser/flashmd";
 import { parseLearnMD } from "./parser/learnmd";
+import { parseNuggetMD } from "./parser/nuggetmd";
 import { parseQuizMD } from "./parser/quizmd";
 import { looksLikeTrack, parseTrackMD, type StepKind, type TrackDocument } from "./parser/trackmd";
 import {
@@ -34,6 +38,8 @@ type AppState =
   | { view: "error"; url: string; message: string; nav?: TrackNav }
   | { view: "quiz"; source: string; nav?: TrackNav }
   | { view: "learn"; source: string; nav?: TrackNav }
+  | { view: "flash"; source: string; nav?: TrackNav }
+  | { view: "nugget"; source: string; nav?: TrackNav }
   | { view: "doc"; source: string; kind: StepKind; label: string; nav?: TrackNav }
   | { view: "track"; doc: TrackDocument; url: string };
 
@@ -50,8 +56,17 @@ export function App() {
     try {
       const content = await fetchContentCached(url);
 
-      if (url.split(/[?#]/)[0].endsWith(".track.md") || looksLikeTrack(content)) {
+      const path = url.split(/[?#]/)[0];
+      if (path.endsWith(".track.md") || looksLikeTrack(content)) {
         setState({ view: "track", doc: parseTrackMD(content), url });
+        return;
+      }
+      if (path.endsWith(".flash.md")) {
+        setState({ view: "flash", source: content });
+        return;
+      }
+      if (path.endsWith(".nugget.md")) {
+        setState({ view: "nugget", source: content });
         return;
       }
 
@@ -95,6 +110,10 @@ export function App() {
         setState({ view: "quiz", source: content, nav });
       } else if (step.kind === "learn") {
         setState({ view: "learn", source: content, nav });
+      } else if (step.kind === "flash") {
+        setState({ view: "flash", source: content, nav });
+      } else if (step.kind === "nugget") {
+        setState({ view: "nugget", source: content, nav });
       } else {
         setState({ view: "doc", source: content, kind: step.kind, label: step.label, nav });
       }
@@ -236,6 +255,10 @@ function renderBody(
       const doc = parseLearnMD(state.source);
       return <LearnView doc={doc} krokiBaseUrl={krokiBaseUrl} />;
     }
+    case "flash":
+      return <FlashDeckView doc={parseFlashMD(state.source)} />;
+    case "nugget":
+      return <NuggetView doc={parseNuggetMD(state.source)} />;
     case "doc":
       return <DocView source={state.source} kind={state.kind} fallbackTitle={state.label} />;
     case "track": {
