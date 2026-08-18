@@ -36,7 +36,11 @@ button and, for GitHub URLs, a suggestion to try the jsDelivr mirror
 ## Tracks
 
 A `.track.md` file renders as a clickable table of contents: sections, steps,
-and `!checkpoint` milestones. Opening a step resolves its `!import ./path`
+and `!checkpoint` milestones. Each step is labelled with the title the imported
+file declares for itself (frontmatter `title`, else its first `# H1`), fetched
+in the background — the list renders immediately with a label derived from the
+filename, and each one is replaced as its file arrives. A step whose file can't
+be read keeps the filename label. Opening a step resolves its `!import ./path`
 relative to the URL the track was loaded from, so a whole multi-file path
 plays straight from a raw GitHub folder — no backend, no account, no upload.
 

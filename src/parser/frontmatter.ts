@@ -72,3 +72,24 @@ export function parseFrontmatter(source: string): FrontmatterResult {
   const body = lines.slice(endIndex + 1).join("\n");
   return { data, body };
 }
+
+/**
+ * The title a LearnSpec file declares for itself: the frontmatter `title`,
+ * else the first `# H1`. Every format in the suite follows this rule.
+ *
+ * Returns `null` when the file names itself neither way — the caller then
+ * falls back to something derived from the filename.
+ */
+export function extractTitle(source: string): string | null {
+  const { data, body } = parseFrontmatter(source);
+  if (typeof data.title === "string" && data.title.trim()) return data.title.trim();
+
+  let inFence = false;
+  for (const line of body.split(/\r\n|\n/)) {
+    if (/^\s*(```|~~~)/.test(line)) inFence = !inFence;
+    if (inFence) continue;
+    const h1 = line.match(/^#\s+(.+?)\s*#*\s*$/);
+    if (h1) return h1[1].trim();
+  }
+  return null;
+}

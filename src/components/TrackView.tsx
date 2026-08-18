@@ -6,11 +6,15 @@
 // concerns. What this view proves is that a track is *navigable* from raw
 // files alone, with no backend and no account.
 
+import { useEffect, useState } from "preact/hooks";
 import type { StepKind, TrackDocument, TrackStep } from "../parser/trackmd";
+import { resolveStepTitles } from "../lib/stepTitles";
 import { Markdown } from "./Markdown";
 
 interface TrackViewProps {
   doc: TrackDocument;
+  /** URL the track came from — the base for reading each step's real title. */
+  url?: string;
   /** Called with the step's flat index; absent when steps can't be resolved. */
   onOpenStep?: (index: number) => void;
   /** Set when the track's own URL gives us no directory to resolve against. */
@@ -25,8 +29,9 @@ const KIND_LABEL: Record<StepKind, string> = {
   other: "File",
 };
 
-export function TrackView({ doc, onOpenStep, unresolvableReason }: TrackViewProps) {
+export function TrackView({ doc, url, onOpenStep, unresolvableReason }: TrackViewProps) {
   const mandatory = doc.steps.filter((s) => !s.optional).length;
+  const titles = useStepTitles(doc, url);
 
   return (
     <article class="track">
@@ -70,7 +75,7 @@ export function TrackView({ doc, onOpenStep, unresolvableReason }: TrackViewProp
                 </li>
               ) : (
                 <li key={j}>
-                  <StepRow step={entry} onOpen={onOpenStep} />
+                  <StepRow step={entry} title={titles.get(entry.index)} onOpen={onOpenStep} />
                 </li>
               ),
             )}
@@ -94,11 +99,37 @@ export function TrackView({ doc, onOpenStep, unresolvableReason }: TrackViewProp
   );
 }
 
-function StepRow({ step, onOpen }: { step: TrackStep; onOpen?: (index: number) => void }) {
+/**
+ * Reads each step's real title from the file it points at, replacing the
+ * filename-derived fallback as the answers arrive.
+ */
+function useStepTitles(doc: TrackDocument, url?: string) {
+  const [titles, setTitles] = useState<Map<number, string>>(new Map());
+
+  useEffect(() => {
+    setTitles(new Map());
+    if (!url || doc.steps.length === 0) return;
+    return resolveStepTitles(doc, url, ({ index, title }) =>
+      setTitles((previous) => new Map(previous).set(index, title)),
+    );
+  }, [doc, url]);
+
+  return titles;
+}
+
+function StepRow({
+  step,
+  title,
+  onOpen,
+}: {
+  step: TrackStep;
+  title?: string;
+  onOpen?: (index: number) => void;
+}) {
   const body = (
     <>
       <span class={`step-kind step-kind-${step.kind}`}>{KIND_LABEL[step.kind]}</span>
-      <span class="step-label">{step.label}</span>
+      <span class="step-label">{title ?? step.label}</span>
       {step.optional && <span class="step-flag">optional</span>}
       {step.passingScore !== undefined && (
         <span class="step-flag">pass {Math.round(step.passingScore * 100)}%</span>

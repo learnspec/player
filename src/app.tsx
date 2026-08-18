@@ -10,10 +10,9 @@ import { looksLikeTrack, parseTrackMD, type StepKind, type TrackDocument } from 
 import {
   detectFormatFromContent,
   detectFormatFromUrl,
-  extractGistContent,
-  resolveContentUrl,
   resolveRelativeUrl,
 } from "./lib/resolve";
+import { fetchContent } from "./lib/fetchContent";
 
 import demoQuizMd from "../samples/demo.quiz.md?raw";
 import demoLearnMd from "../samples/demo.learn.md?raw";
@@ -40,44 +39,6 @@ type AppState =
 
 function getQueryParam(name: string): string | null {
   return new URLSearchParams(window.location.search).get(name);
-}
-
-async function fetchContent(url: string): Promise<string> {
-  const resolved = resolveContentUrl(url);
-
-  try {
-    const res = await fetch(resolved.primary, { headers: { Accept: "text/plain, */*" } });
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status} ${res.statusText}`);
-    }
-    if (resolved.primary.includes("api.github.com/gists/")) {
-      const json = await res.json();
-      const content = extractGistContent(json);
-      if (!content) throw new Error("No matching file found in this Gist.");
-      return content;
-    }
-    return await res.text();
-  } catch (primaryError) {
-    if (resolved.fallback) {
-      try {
-        const res = await fetch(resolved.fallback);
-        if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-        return await res.text();
-      } catch (fallbackError) {
-        throw new Error(
-          `Could not fetch from the original URL (${
-            primaryError instanceof Error ? primaryError.message : String(primaryError)
-          }), and the jsDelivr fallback also failed (${
-            fallbackError instanceof Error ? fallbackError.message : String(fallbackError)
-          }).`,
-        );
-      }
-    }
-    const reason = primaryError instanceof Error ? primaryError.message : String(primaryError);
-    const hint =
-      " This can happen with CORS restrictions, a 404, or GitHub rate-limiting. If this is a GitHub file, try the jsDelivr mirror instead: https://cdn.jsdelivr.net/gh/OWNER/REPO@REF/PATH";
-    throw new Error(`Failed to fetch ${resolved.primary}: ${reason}.${hint}`);
-  }
 }
 
 export function App() {
@@ -285,6 +246,7 @@ function renderBody(
       return (
         <TrackView
           doc={state.doc}
+          url={state.url}
           onOpenStep={
             resolvable ? (index) => openStep(state.doc, state.url, index) : undefined
           }
