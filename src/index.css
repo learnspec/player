@@ -1110,3 +1110,11 @@ blockquote.callout-generic .callout-label {
   font-size: 0.9rem;
   margin-bottom: 1.5rem;
 }
+
+/* A step label still showing its filename fallback while the real title is
+   being read. Dimming it makes the swap read as "this resolved" rather than
+   as text changing under the reader for no reason — which is why there is no
+   progress bar: the state belongs on the label, not in a separate widget. */
+.step-label-provisional {
+  opacity: 0.5;
+}

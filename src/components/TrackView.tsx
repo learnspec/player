@@ -75,7 +75,12 @@ export function TrackView({ doc, url, onOpenStep, unresolvableReason }: TrackVie
                 </li>
               ) : (
                 <li key={j}>
-                  <StepRow step={entry} title={titles.get(entry.index)} onOpen={onOpenStep} />
+                  <StepRow
+                    step={entry}
+                    title={titles.get(entry.index) ?? undefined}
+                    provisional={Boolean(url) && !titles.has(entry.index)}
+                    onOpen={onOpenStep}
+                  />
                 </li>
               ),
             )}
@@ -104,7 +109,9 @@ export function TrackView({ doc, url, onOpenStep, unresolvableReason }: TrackVie
  * filename-derived fallback as the answers arrive.
  */
 function useStepTitles(doc: TrackDocument, url?: string) {
-  const [titles, setTitles] = useState<Map<number, string>>(new Map());
+  // A key present with a null value means "settled, no title" — distinct from
+  // absent, which means "still being read".
+  const [titles, setTitles] = useState<Map<number, string | null>>(new Map());
 
   useEffect(() => {
     setTitles(new Map());
@@ -120,16 +127,21 @@ function useStepTitles(doc: TrackDocument, url?: string) {
 function StepRow({
   step,
   title,
+  provisional,
   onOpen,
 }: {
   step: TrackStep;
   title?: string;
+  /** The label is still the filename fallback, with the real title on its way. */
+  provisional?: boolean;
   onOpen?: (index: number) => void;
 }) {
   const body = (
     <>
       <span class={`step-kind step-kind-${step.kind}`}>{KIND_LABEL[step.kind]}</span>
-      <span class="step-label">{title ?? step.label}</span>
+      <span class={`step-label${provisional ? " step-label-provisional" : ""}`}>
+        {title ?? step.label}
+      </span>
       {step.optional && <span class="step-flag">optional</span>}
       {step.passingScore !== undefined && (
         <span class="step-flag">pass {Math.round(step.passingScore * 100)}%</span>

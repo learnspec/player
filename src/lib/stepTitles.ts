@@ -23,7 +23,8 @@ const CONCURRENCY = 6;
 
 export interface TitleResolution {
   index: number;
-  title: string;
+  /** `null` once settled with no title to show — keep the fallback label. */
+  title: string | null;
 }
 
 /**
@@ -45,10 +46,12 @@ export function resolveStepTitles(
   // Anything already known is reported synchronously, so navigating back to a
   // track doesn't flash the fallback labels again.
   const pending = queue.filter(({ index, url }) => {
-    if (!url) return false;
+    if (!url) {
+      onTitle({ index, title: null });
+      return false;
+    }
     if (!cache.has(url)) return true;
-    const cached = cache.get(url);
-    if (cached) onTitle({ index, title: cached });
+    onTitle({ index, title: cache.get(url) ?? null });
     return false;
   });
 
@@ -60,11 +63,12 @@ export function resolveStepTitles(
       try {
         const title = extractTitle(await fetchContentCached(item.url));
         cache.set(item.url, title);
-        if (title && !cancelled) onTitle({ index: item.index, title });
+        if (!cancelled) onTitle({ index: item.index, title });
       } catch {
         // A step that can't be read keeps its filename-derived label; the
         // failure surfaces properly if the reader actually opens that step.
         cache.set(item.url, null);
+        if (!cancelled) onTitle({ index: item.index, title: null });
       }
     }
   };
