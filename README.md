@@ -65,6 +65,7 @@ renders as a read-only syllabus.
 | `> ...` trailing blockquote | Rendered as the post-answer explanation |
 | ` ```quiz ` config fence (`id`, `type`, `points`, `hint`) | Parsed and shown on the question card |
 | `> [!note]` / `[!tip]` / `[!warning]` / `[!important]` / `[!caution]` / `[!summary]` / `[!example]` / `[!objectives]` | Rendered as styled callout boxes |
+| Any other `> [!type]` marker | Rendered as a neutral callout labelled with the type name — the marker is never left as literal text, but no semantic is invented for a type the spec doesn't define |
 | `!import` / `!ref` / `!checkpoint` in TrackMD | Parsed into steps, context references and milestones (`optional:true` and `passing_score:` attributes included) |
 | `!import` in LearnMD | **Not implemented** — LearnMD-level composition is ignored, so a lesson assembled from other files renders without them |
 | ` ```example ` / ` ```summary ` fences | Rendered as styled boxes (content is Markdown) |
@@ -73,8 +74,9 @@ renders as a read-only syllabus.
 | ` ```mermaid ` | Rendered with the [mermaid](https://mermaid.js.org/) library (loaded on demand) |
 | ` ```graphviz ` / ` ```plantuml ` / ` ```d2 ` | Rendered as an `<img>` via [kroki.io](https://kroki.io) |
 | ` ```tikz ` | Rendered via kroki.io. A bare `\begin{tikzpicture}` snippet is wrapped in a `standalone` document first — kroki.io's TikZ backend compiles a whole LaTeX document and rejects a bare snippet |
+| ` ```vega-lite ` | Rendered as a static chart via kroki.io (server-rendered SVG, so no tooltips or interaction) |
 | ` ```latex ` | **Degrades** — kroki.io has no generic LaTeX diagram type |
-| ` ```d3 `, ` ```geomap `, ` ```chess `, ` ```vega-lite `, ` ```svg `, ` ```abc `, `diagram ref:` | **Degrades** — shown as a labeled, unrendered source block |
+| ` ```d3 `, ` ```geomap `, ` ```chess `, ` ```svg `, ` ```abc `, `diagram ref:` | **Degrades** — shown as a labeled, unrendered source block |
 | Any other fenced code block | Rendered as a plain Markdown code block (no special handling) |
 
 "Degrades" means the block is never silently dropped: it's shown as its raw
@@ -82,7 +84,7 @@ source in a code block with a "not rendered by this player" banner.
 
 ## kroki.io
 
-Diagram rendering for Graphviz, PlantUML, D2 and TikZ goes through the
+Diagram rendering for Graphviz, PlantUML, D2, TikZ and Vega-Lite goes through the
 public [kroki.io](https://kroki.io) service — a third-party dependency, not
 something this project hosts. The diagram source is compressed
 (deflate, raw) and base64url-encoded into the image URL; nothing is sent as

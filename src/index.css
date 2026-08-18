@@ -436,6 +436,16 @@ blockquote.callout-objectives .callout-label {
   color: var(--accent);
 }
 
+/* A callout type the spec doesn't name: styled, but neutrally — the player
+   shouldn't imply a semantic it was never given. */
+blockquote.callout-generic {
+  background: var(--bg-raised);
+  border-color: var(--border);
+}
+blockquote.callout-generic .callout-label {
+  color: var(--text-muted);
+}
+
 /* --- Example / summary boxes -------------------------------------------- */
 
 .box {

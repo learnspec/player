@@ -73,6 +73,33 @@ late in the evening. By February the same stars are already high in the south
 at the same clock time — about two hours earlier per month.
 ```
 
+## How much light gets through
+
+Brightness in astronomy is measured in magnitudes, where *lower* means
+brighter and each step of 1 is a factor of about 2.5. Naked-eye visibility
+runs out somewhere around magnitude 6 in a dark sky — and much sooner than
+that under city lighting.
+
+```vega-lite
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Faintest star visible by sky condition",
+  "data": {
+    "values": [
+      {"sky": "City centre", "magnitude": 3.0},
+      {"sky": "Suburb", "magnitude": 4.5},
+      {"sky": "Countryside", "magnitude": 5.5},
+      {"sky": "Dark site", "magnitude": 6.5}
+    ]
+  },
+  "mark": "bar",
+  "encoding": {
+    "y": {"field": "sky", "type": "nominal", "sort": null, "title": null},
+    "x": {"field": "magnitude", "type": "quantitative", "title": "Faintest magnitude visible"}
+  }
+}
+```
+
 ## Planets wander
 
 The word *planet* comes from the Greek for "wanderer". Stars keep their

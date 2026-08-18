@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { buildKrokiUrl, isKrokiRenderable, wrapTikzDocument } from "./kroki";
+import {
+  buildKrokiUrl,
+  encodeKrokiPayload,
+  isKrokiRenderable,
+  wrapTikzDocument,
+} from "./kroki";
 
 describe("wrapTikzDocument", () => {
   it("wraps a bare tikzpicture in a standalone document", () => {
@@ -52,5 +57,20 @@ describe("buildKrokiUrl", () => {
   it("honours a custom instance base URL, without a trailing slash", () => {
     const url = buildKrokiUrl("graphviz", "digraph G { a -> b }", "https://kroki.example.com/");
     expect(url?.startsWith("https://kroki.example.com/graphviz/svg/")).toBe(true);
+  });
+});
+
+describe("vega-lite", () => {
+  it("maps the spec's `vega-lite` fence id to kroki.io's `vegalite` type", () => {
+    expect(isKrokiRenderable("vega-lite")).toBe(true);
+    const url = buildKrokiUrl("vega-lite", '{"mark":"bar"}');
+    expect(url?.startsWith("https://kroki.io/vegalite/svg/")).toBe(true);
+  });
+
+  it("does not wrap a vega-lite spec the way tikz sources are wrapped", () => {
+    const source = '{"mark":"bar"}';
+    expect(buildKrokiUrl("vega-lite", source)).toBe(
+      `https://kroki.io/vegalite/svg/${encodeKrokiPayload(source)}`,
+    );
   });
 });

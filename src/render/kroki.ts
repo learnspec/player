@@ -12,6 +12,7 @@ const KROKI_TYPE: Partial<Record<DiagramKind, string>> = {
   plantuml: "plantuml",
   d2: "d2",
   tikz: "tikz",
+  "vega-lite": "vegalite",
   // kroki.io has no generic "latex" diagram type — a plain LaTeX snippet has
   // no equivalent here and degrades to a code block instead.
 };
