@@ -172,7 +172,9 @@ export function App() {
           onGo={(index) => openStep(nav.doc, nav.url, index)}
         />
       )}
-      <div class="app-content">
+      {/* The view name drives the column width: a table of contents wants
+          more room than running prose, prose wants a readable measure. */}
+      <div class={`app-content app-content-${state.view}`}>
         {renderBody(state, loadUrl, loadSample, openStep, krokiBaseUrl)}
       </div>
       <footer class="app-footer">
