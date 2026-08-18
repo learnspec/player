@@ -11,7 +11,7 @@
 // keeps its fallback label.
 
 import { extractTitle } from "../parser/frontmatter";
-import { fetchContent } from "./fetchContent";
+import { fetchContentCached } from "./contentCache";
 import { resolveRelativeUrl } from "./resolve";
 import type { TrackDocument } from "../parser/trackmd";
 
@@ -58,7 +58,7 @@ export function resolveStepTitles(
       const item = pending[next++];
       if (!item || !item.url) return;
       try {
-        const title = extractTitle(await fetchContent(item.url));
+        const title = extractTitle(await fetchContentCached(item.url));
         cache.set(item.url, title);
         if (title && !cancelled) onTitle({ index: item.index, title });
       } catch {

@@ -12,7 +12,7 @@ import {
   detectFormatFromUrl,
   resolveRelativeUrl,
 } from "./lib/resolve";
-import { fetchContent } from "./lib/fetchContent";
+import { fetchContentCached } from "./lib/contentCache";
 
 import demoQuizMd from "../samples/demo.quiz.md?raw";
 import demoLearnMd from "../samples/demo.learn.md?raw";
@@ -48,7 +48,7 @@ export function App() {
   const loadUrl = async (url: string) => {
     setState({ view: "loading", url });
     try {
-      const content = await fetchContent(url);
+      const content = await fetchContentCached(url);
 
       if (url.split(/[?#]/)[0].endsWith(".track.md") || looksLikeTrack(content)) {
         setState({ view: "track", doc: parseTrackMD(content), url });
@@ -90,7 +90,7 @@ export function App() {
 
     setState({ view: "loading", url: target, nav });
     try {
-      const content = await fetchContent(target);
+      const content = await fetchContentCached(target);
       if (step.kind === "quiz") {
         setState({ view: "quiz", source: content, nav });
       } else if (step.kind === "learn") {

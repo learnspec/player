@@ -40,7 +40,13 @@ and `!checkpoint` milestones. Each step is labelled with the title the imported
 file declares for itself (frontmatter `title`, else its first `# H1`), fetched
 in the background — the list renders immediately with a label derived from the
 filename, and each one is replaced as its file arrives. A step whose file can't
-be read keeps the filename label. Opening a step resolves its `!import ./path`
+be read keeps the filename label.
+
+That costs one request per step, so those requests double as a prefetch: every
+file goes through a shared cache, and opening a step afterwards is served from
+memory with no network at all. On a 37-step track that is 37 requests totalling
+about 157 KB — roughly the size of the player's own main JS chunk — after which
+every step opens instantly. Opening a step resolves its `!import ./path`
 relative to the URL the track was loaded from, so a whole multi-file path
 plays straight from a raw GitHub folder — no backend, no account, no upload.
 
