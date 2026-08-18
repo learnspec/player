@@ -75,6 +75,32 @@ export function extractGistContent(gistApiResponse: unknown): string | null {
   return (preferred ?? entries[0]).content ?? null;
 }
 
+/**
+ * Resolves a TrackMD `!import ./sibling.learn.md` path against the URL the
+ * track itself was loaded from.
+ *
+ * Resolution happens against the *original* URL rather than the rewritten
+ * raw one, so a `github.com/.../blob/...` track yields a sibling blob URL
+ * that `resolveContentUrl` can then rewrite (and attach a jsDelivr fallback
+ * to) exactly like a hand-pasted one.
+ *
+ * Returns `null` when the base URL has no meaningful directory to resolve
+ * against — notably Gists, whose files are a flat API payload, not paths.
+ */
+export function resolveRelativeUrl(baseUrl: string, relativePath: string): string | null {
+  const path = relativePath.trim();
+  if (/^https?:\/\//i.test(path)) return path;
+
+  const base = baseUrl.trim();
+  if (/gist\.github\.com|api\.github\.com\/gists\//i.test(base)) return null;
+
+  try {
+    return new URL(path, base).toString();
+  } catch {
+    return null;
+  }
+}
+
 export type LearnSpecFormat = "quiz" | "learn";
 
 /** Detects the format from a URL's file extension, defaulting to `"learn"`. */

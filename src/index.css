@@ -318,6 +318,33 @@ blockquote.callout-important .callout-label {
   color: var(--important-border);
 }
 
+/* `caution` shares the warning palette — same "watch out" register. */
+blockquote.callout-caution {
+  background: var(--warning-bg);
+  border-color: var(--incorrect);
+}
+blockquote.callout-caution .callout-label {
+  color: var(--incorrect);
+}
+
+blockquote.callout-summary,
+blockquote.callout-example {
+  background: var(--code-bg);
+  border-color: var(--text-muted);
+}
+blockquote.callout-summary .callout-label,
+blockquote.callout-example .callout-label {
+  color: var(--text-muted);
+}
+
+blockquote.callout-objectives {
+  background: var(--important-bg);
+  border-color: var(--accent);
+}
+blockquote.callout-objectives .callout-label {
+  color: var(--accent);
+}
+
 /* --- Example / summary boxes -------------------------------------------- */
 
 .box {
@@ -701,4 +728,186 @@ blockquote.callout-important .callout-label {
   align-items: center;
   gap: 1rem;
   font-size: 1.05rem;
+}
+
+/* --- TrackMD: table of contents + step navigation ---------------------- */
+
+.track-header {
+  margin-bottom: 2rem;
+}
+
+.track-kicker {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.35rem;
+}
+
+.track-description {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  margin: 0.5rem 0 0;
+}
+
+.track-meta {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin: 0.75rem 0 0;
+}
+
+.track-intro {
+  margin-bottom: 2rem;
+}
+
+.track-notice {
+  background: var(--note-bg);
+  border-left: 3px solid var(--note-border);
+  padding: 0.75rem 1rem;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.9rem;
+}
+
+.track-section {
+  margin-bottom: 2rem;
+}
+
+.track-section h2 {
+  font-size: 1.05rem;
+  margin: 0 0 0.75rem;
+}
+
+.track-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.track-step {
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.track-step:hover:not(.track-step-static) {
+  border-color: var(--accent);
+}
+
+.track-step-static {
+  cursor: default;
+  opacity: 0.75;
+}
+
+.step-kind {
+  flex: none;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
+}
+
+.step-kind-learn {
+  color: var(--note-border);
+  border-color: var(--note-border);
+}
+
+.step-kind-quiz {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.step-label {
+  flex: 1;
+}
+
+.step-flag {
+  flex: none;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.track-checkpoint {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.track-checkpoint-marker {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  flex: none;
+}
+
+.track-refs h2 {
+  font-size: 0.95rem;
+}
+
+.track-refs ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.track-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 1.25rem;
+  background: var(--bg-raised);
+  border-bottom: 1px solid var(--border);
+}
+
+.track-bar-position {
+  flex: 1;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.track-bar-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.btn-small {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+.doc-notice {
+  background: var(--warning-bg);
+  border-left: 3px solid var(--warning-border);
+  padding: 0.75rem 1rem;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
 }

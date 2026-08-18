@@ -40,7 +40,16 @@ function extractMath(markdown: string): { text: string; placeholders: MathPlaceh
   return { text, placeholders };
 }
 
-const CALLOUT_MARKER_RE = /^\s*\[!(note|tip|warning|important)\]\s*/i;
+// The eight callout types LearnMD defines (SPEC §Callouts). The first five
+// are GitHub-compatible; summary/example/objectives degrade to a plain
+// blockquote elsewhere, which is exactly what they do here if unrecognised.
+const CALLOUT_MARKER_RE =
+  /^\s*\[!(note|tip|warning|important|caution|summary|example|objectives)\]\s*/i;
+
+/** Display label per callout type — only `objectives` isn't just capitalised. */
+const CALLOUT_LABEL: Record<string, string> = {
+  objectives: "Learning objectives",
+};
 
 /** Detects `> [!note]`-style GFM callouts and adds styling hooks. */
 function applyCalloutStyling(html: string): string {
@@ -60,7 +69,7 @@ function applyCalloutStyling(html: string): string {
 
     const label = document.createElement("div");
     label.className = "callout-label";
-    label.textContent = kind.charAt(0).toUpperCase() + kind.slice(1);
+    label.textContent = CALLOUT_LABEL[kind] ?? kind.charAt(0).toUpperCase() + kind.slice(1);
     bq.insertBefore(label, bq.firstChild);
   });
 

@@ -1,6 +1,7 @@
 # LearnSpec Player
 
-Static, 100% client-side player for LearnSpec formats (QuizMD, LearnMD).
+Static, 100% client-side player for LearnSpec formats (QuizMD, LearnMD,
+TrackMD).
 
 Paste a raw file URL and it renders in your browser — nothing is uploaded
 anywhere, there is no backend. The whole app is a static bundle you can host
@@ -10,7 +11,7 @@ on any static file server or CDN.
 
 Open the app and either:
 
-- paste a URL to a `.quiz.md` or `.learn.md` file, or
+- paste a URL to a `.quiz.md`, `.learn.md` or `.track.md` file, or
 - click one of the "try a sample" buttons, or
 - load a file directly via a query string: `?url=<url-encoded file URL>`
 
@@ -22,14 +23,32 @@ Open the app and either:
 - a `gist.github.com/...` page URL (resolved through the GitHub Gist API)
 - any other URL that serves the file directly with permissive CORS headers
 
-If a URL doesn't end in `.quiz.md` or `.learn.md`, the format is guessed
-from the content: a `## ` question section containing a `- [ ]` / `- [x]`
-checkbox choice is treated as QuizMD, otherwise the file is treated as
+If a URL doesn't end in `.quiz.md`, `.learn.md` or `.track.md`, the format
+is guessed from the content: a file containing `!import` directives is
+treated as TrackMD; a `## ` question section containing a `- [ ]` / `- [x]`
+checkbox choice is treated as QuizMD; otherwise the file is treated as
 LearnMD.
 
 Fetch errors (CORS, 404, GitHub rate-limiting, ...) are shown with a retry
 button and, for GitHub URLs, a suggestion to try the jsDelivr mirror
 (`https://cdn.jsdelivr.net/gh/OWNER/REPO@REF/PATH`) directly.
+
+## Tracks
+
+A `.track.md` file renders as a clickable table of contents: sections, steps,
+and `!checkpoint` milestones. Opening a step resolves its `!import ./path`
+relative to the URL the track was loaded from, so a whole multi-file path
+plays straight from a raw GitHub folder — no backend, no account, no upload.
+
+Steps of type `.learn.md` and `.quiz.md` open in the full lesson and quiz
+views. `.flash.md`, `.nugget.md` and anything else open in a plain reading
+view with a banner saying so: scheduling, review queues and cross-step
+progress are *player* features, not format features, and this player
+deliberately implements none of them. Nothing is persisted between steps.
+
+Relative imports need a URL with a directory to resolve against. A raw or
+`blob` GitHub URL works; a Gist does not, so a track loaded from a Gist
+renders as a read-only syllabus.
 
 ## Supported blocks vs. graceful degradation
 
@@ -45,7 +64,9 @@ button and, for GitHub URLs, a suggestion to try the jsDelivr mirror
 | `> [!correct]` / `> [!incorrect]` | Rendered as feedback shown only on a correct / incorrect answer |
 | `> ...` trailing blockquote | Rendered as the post-answer explanation |
 | ` ```quiz ` config fence (`id`, `type`, `points`, `hint`) | Parsed and shown on the question card |
-| `> [!note]` / `[!tip]` / `[!warning]` / `[!important]` | Rendered as styled callout boxes |
+| `> [!note]` / `[!tip]` / `[!warning]` / `[!important]` / `[!caution]` / `[!summary]` / `[!example]` / `[!objectives]` | Rendered as styled callout boxes |
+| `!import` / `!ref` / `!checkpoint` in TrackMD | Parsed into steps, context references and milestones (`optional:true` and `passing_score:` attributes included) |
+| `!import` in LearnMD | **Not implemented** — LearnMD-level composition is ignored, so a lesson assembled from other files renders without them |
 | ` ```example ` / ` ```summary ` fences | Rendered as styled boxes (content is Markdown) |
 | ` ```quiz ` fence in LearnMD | Rendered as an inline interactive mini-quiz |
 | `$...$` / `$$...$$` | Rendered with [KaTeX](https://katex.org/) (loaded on demand) |
@@ -111,8 +132,10 @@ src/
   render/markdown.ts     # marked + DOMPurify + KaTeX + callout styling
   render/kroki.ts         # kroki.io payload encoding
   components/             # Preact components (QuizPlayer, LearnView, UrlLoader, ...)
-  lib/resolve.ts           # URL rewriting (GitHub blob/raw, Gist, jsDelivr fallback)
-samples/                   # demo .quiz.md / .learn.md files used by "try a sample"
+  parser/trackmd.ts       # TrackMD parser (sections, !import/!ref/!checkpoint)
+  lib/resolve.ts           # URL rewriting (GitHub blob/raw, Gist, jsDelivr) + relative imports
+samples/                   # demo .quiz.md / .learn.md files inlined into the bundle
+public/samples/track-demo/ # multi-file TrackMD demo, served as static files
 ```
 
 ## License
