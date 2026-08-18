@@ -72,7 +72,8 @@ renders as a read-only syllabus.
 | `$...$` / `$$...$$` | Rendered with [KaTeX](https://katex.org/) (loaded on demand) |
 | ` ```mermaid ` | Rendered with the [mermaid](https://mermaid.js.org/) library (loaded on demand) |
 | ` ```graphviz ` / ` ```plantuml ` / ` ```d2 ` | Rendered as an `<img>` via [kroki.io](https://kroki.io) |
-| ` ```tikz ` / ` ```latex ` | **Degrades** — the public kroki.io TikZ endpoint is currently unreliable, and kroki.io has no generic LaTeX diagram type |
+| ` ```tikz ` | Rendered via kroki.io. A bare `\begin{tikzpicture}` snippet is wrapped in a `standalone` document first — kroki.io's TikZ backend compiles a whole LaTeX document and rejects a bare snippet |
+| ` ```latex ` | **Degrades** — kroki.io has no generic LaTeX diagram type |
 | ` ```d3 `, ` ```geomap `, ` ```chess `, ` ```vega-lite `, ` ```svg `, ` ```abc `, `diagram ref:` | **Degrades** — shown as a labeled, unrendered source block |
 | Any other fenced code block | Rendered as a plain Markdown code block (no special handling) |
 
@@ -81,7 +82,7 @@ source in a code block with a "not rendered by this player" banner.
 
 ## kroki.io
 
-Diagram rendering for Graphviz, PlantUML, and D2 goes through the
+Diagram rendering for Graphviz, PlantUML, D2 and TikZ goes through the
 public [kroki.io](https://kroki.io) service — a third-party dependency, not
 something this project hosts. The diagram source is compressed
 (deflate, raw) and base64url-encoded into the image URL; nothing is sent as
