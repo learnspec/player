@@ -1332,9 +1332,15 @@ blockquote.callout-generic .callout-label {
   transform-box: fill-box;
   transform-origin: 50% 50%;
 }
+/* The keyframes MUST use the individual `scale:` property, never
+   `transform:` — in a mermaid SVG, `transform` is the presentation
+   attribute carrying every group's position, and a CSS transform wins
+   over a presentation attribute: animating it teleports the pulsed
+   element to the origin for the animation's duration. `scale:` composes
+   with the attribute instead of replacing it. */
 @keyframes am-pulse {
-  0%, 100% { transform: scale(1); }
-  45% { transform: scale(1.05); }
+  0%, 100% { scale: 1; }
+  45% { scale: 1.05; }
 }
 
 /* Caption panel. `captions: overlay` (the default) pins it over the bottom
