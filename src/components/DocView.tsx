@@ -18,9 +18,9 @@ interface DocViewProps {
 }
 
 const NOTICE: Partial<Record<StepKind, string>> = {
-  flash: "Flashcards are shown as a plain document — scheduling and review are player features, not format features.",
-  nugget: "Shown as a plain document — this player renders NuggetMD without its card behaviour.",
-  other: "Shown as a plain Markdown document — this player has no dedicated view for this format.",
+  flash: "Flashcards are shown as a plain document: scheduling and review are player features, not format features.",
+  nugget: "Shown as a plain document: this player renders NuggetMD without its card behaviour.",
+  other: "Shown as a plain Markdown document: this player has no dedicated view for this format.",
 };
 
 export function DocView({ source, kind, fallbackTitle }: DocViewProps) {

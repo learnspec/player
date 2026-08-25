@@ -1,5 +1,5 @@
 ---
-title: "Reading the Night Sky — A Short Track"
+title: "Reading the Night Sky: A Short Track"
 lang: en
 description: "A three-step demonstration track: a lesson, a quiz, and an optional flashcard deck, orchestrated by TrackMD."
 estimated_time: 25min
@@ -12,7 +12,7 @@ completion:
   passing_score: 0.6
 ---
 
-# Reading the Night Sky — A Short Track
+# Reading the Night Sky: A Short Track
 
 > [!objectives]
 > By the end of this track, you will be able to:
@@ -27,7 +27,7 @@ completion:
 !import ./01-planets-vs-stars.learn.md
 !import ./02-check.quiz.md passing_score:0.6
 
-!checkpoint id:observing-done label:"Observing — you can tell planets from stars"
+!checkpoint id:observing-done label:"Observing: you can tell planets from stars"
 
 ## Going Further (Optional)
 

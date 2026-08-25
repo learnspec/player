@@ -6,8 +6,8 @@ partial_scoring: true
 
 # QuizMD demo
 
-This quiz exercises all five QuizMD question types — mcq, multi, open,
-match, and order — plus per-question hints, explanations, and inline math.
+This quiz exercises all five QuizMD question types, mcq, multi, open,
+match, and order, plus per-question hints, explanations, and inline math.
 
 ## What is the capital of France?
 

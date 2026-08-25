@@ -1,5 +1,5 @@
 ---
-title: "Examples — the water cycle"
+title: "Examples: the water cycle"
 spec_version: '0.2'
 ---
 
@@ -55,7 +55,7 @@ draw: droplets
 show: rain
 focus: droplets, rain
 
-When the droplets grow too heavy to stay aloft, they fall — as rain or snow.
+When the droplets grow too heavy to stay aloft, they fall, as rain or snow.
 
 ## The cycle closes
 draw: runoff

@@ -21,5 +21,5 @@ caused by the Earth and that planet moving around the Sun at different speeds.
 ## Celestial pole
 
 The point in the sky the Earth's axis points at. Everything appears to rotate
-around it over the course of a night — in the northern hemisphere it sits close
+around it over the course of a night, in the northern hemisphere it sits close
 to Polaris.

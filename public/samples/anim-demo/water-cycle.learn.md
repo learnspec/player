@@ -11,7 +11,7 @@ level: beginner
 
 Earth neither gains nor loses water: the water you drank this morning has
 been through this loop countless times. What makes the cycle worth
-*animating* rather than just showing is its direction — read in the order
+*animating* rather than just showing is its direction, read in the order
 the water actually travels, each station explains the next one.
 
 Tap the diagram (or scroll through the steps) to follow the journey:
@@ -25,7 +25,7 @@ Everything else is bookkeeping between those two.
 
 ## The same figure, all at once
 
-For comparison, here is the exact same stock diagram referenced statically —
+For comparison, here is the exact same stock diagram referenced statically, 
 four boxes and four arrows, correct but mute about the mechanism:
 
 ```diagram ref:water-cycle
@@ -35,4 +35,4 @@ four boxes and four arrows, correct but mute about the mechanism:
 > Both blocks reference the **same** entry in `stock.diagram.md`. The
 > animated one plays the entry's AnimMD companion script; the static one
 > ignores it. Deleting the script would turn the first block into the
-> second — degradation is the format's core design argument.
+> second, degradation is the format's core design argument.

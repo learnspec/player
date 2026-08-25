@@ -247,7 +247,7 @@ function QuestionCard({
 
       {question.type === "unsupported" && (
         <p class="question-warning">
-          ⚠ Unsupported question type — this question has no checkboxes, no <code>___</code> blank,
+          ⚠ Unsupported question type: this question has no checkboxes, no <code>___</code> blank,
           no match table, and no ordered list, so it can't be answered here.
         </p>
       )}
@@ -459,7 +459,7 @@ function MatchQuestion({
                       });
                     }}
                   >
-                    <option value="">— choose —</option>
+                    <option value="">choose…</option>
                     {answer.options.map((opt) => (
                       <option key={opt} value={opt}>
                         {opt}

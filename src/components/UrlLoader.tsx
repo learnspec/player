@@ -38,7 +38,7 @@ export function UrlLoader({ onLoad, onLoadSample, initialUrl }: UrlLoaderProps) 
       <h1>LearnSpec Player</h1>
       <p class="tagline">
         A static, 100% client-side player for <strong>QuizMD</strong>,{" "}
-        <strong>LearnMD</strong> and <strong>TrackMD</strong> — paste a raw file URL and it
+        <strong>LearnMD</strong> and <strong>TrackMD</strong>. Paste a raw file URL and it
         renders in your browser, nothing uploaded anywhere.
       </p>
 

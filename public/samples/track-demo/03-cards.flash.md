@@ -1,12 +1,12 @@
 ---
-title: "Night Sky — Flashcards"
+title: "Night Sky: Flashcards"
 lang: en
 description: "Four cards on twinkling, the two motions of the sky, and retrograde motion."
 license: CC-BY-4.0
 spec_version: "0.3"
 ---
 
-# Night Sky — Flashcards
+# Night Sky: Flashcards
 
 ```flash id:why-stars-twinkle
 Why do stars twinkle?

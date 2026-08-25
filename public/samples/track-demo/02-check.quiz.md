@@ -1,12 +1,12 @@
 ---
-title: "Check — Planets, Stars and Motion"
+title: "Check: Planets, Stars and Motion"
 lang: en
 description: "Four questions on twinkling, the two motions of the sky, and what makes a planet a wanderer."
 passing_score: 0.6
 license: CC-BY-4.0
 ---
 
-# Check — Planets, Stars and Motion
+# Check: Planets, Stars and Motion
 
 ## Q1 · Why do stars twinkle while planets usually don't?
 
@@ -16,8 +16,8 @@ license: CC-BY-4.0
 - [ ] Starlight has to cross more of the atmosphere than planet light
 
 > A star arrives as a single point of light, so every small deflection by moving
-> air shows up as a flicker. A planet arrives as a small disc — many rays at
-> once — and the wobbles cancel out.
+> air shows up as a flicker. A planet arrives as a small disc, many rays at
+> once, and the wobbles cancel out.
 
 ## Q2 · Which of these are consequences of the Earth's spin, rather than its orbit?
 

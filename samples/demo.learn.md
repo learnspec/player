@@ -14,7 +14,7 @@ web itself.
 > This lesson assumes you already know basic set notation ($V$, $E$).
 
 > [!tip]
-> Draw the graph on paper as you read — it makes the definitions click much
+> Draw the graph on paper as you read, it makes the definitions click much
 > faster than reading alone.
 
 ## Formal definition
@@ -34,7 +34,7 @@ have degree 1.
 
 > [!warning]
 > Don't confuse a graph's **order** (number of vertices) with its **size**
-> (number of edges) — they're easy to swap by accident.
+> (number of edges), they're easy to swap by accident.
 
 ## Quick check
 
@@ -70,7 +70,7 @@ digraph G {
 
 > [!important]
 > The Graphviz and Mermaid diagrams above are rendered through
-> [kroki.io](https://kroki.io) or the `mermaid` JS library — see the README
+> [kroki.io](https://kroki.io) or the `mermaid` JS library, see the README
 > for details and how to point at a different kroki instance. TikZ,
 > PlantUML, and D2 fences are also supported through kroki.io, though
 > rendering quality/availability depends on that third-party service.

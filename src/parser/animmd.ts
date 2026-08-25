@@ -122,14 +122,14 @@ export function parseAnimScript(text: string): AnimParseResult {
       inBind = true;
     } else if (key === "pace") {
       if (value.trim() && value.trim() !== "learner") {
-        warnings.push(`unknown pace "${value.trim()}" — treated as learner`);
+        warnings.push(`unknown pace "${value.trim()}", treated as learner`);
       }
     } else if (key === "badges") {
       script.badges = value.trim() === "true";
     } else if (key === "captions") {
       const v = value.trim();
       if (v === "overlay" || v === "below") script.captions = v;
-      else if (v) warnings.push(`unknown captions "${v}" — treated as overlay`);
+      else if (v) warnings.push(`unknown captions "${v}", treated as overlay`);
     }
     // Other keys (for, lang, scene…) tolerated and ignored.
   }

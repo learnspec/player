@@ -11,7 +11,7 @@ license: CC-BY-4.0
 
 Step outside on a clear night, away from the worst of the streetlights, and the
 sky offers a few hundred visible points of light. Most of them are stars. A
-handful are planets — and you can usually tell which is which without any
+handful are planets, and you can usually tell which is which without any
 equipment at all.
 
 ## Twinkling is atmosphere, not starlight
@@ -44,7 +44,7 @@ one way, some the other, and the wobbles average out. The light holds steady.
 A single ray, deflected differently from instant to instant: that is a twinkle.
 
 > [!tip]
-> Low on the horizon, everything twinkles more — you are looking through a much
+> Low on the horizon, everything twinkles more, you are looking through a much
 > longer slant of atmosphere. Judge steadiness on objects reasonably high up.
 
 ```summary
@@ -72,14 +72,14 @@ the night side faces a different direction.
 ```example
 Watch Orion across a winter. In early December it clears the eastern horizon
 late in the evening. By February the same stars are already high in the south
-at the same clock time — about two hours earlier per month.
+at the same clock time, about two hours earlier per month.
 ```
 
 ## How much light gets through
 
 Brightness in astronomy is measured in magnitudes, where *lower* means
 brighter and each step of 1 is a factor of about 2.5. Naked-eye visibility
-runs out somewhere around magnitude 6 in a dark sky — and much sooner than
+runs out somewhere around magnitude 6 in a dark sky, and much sooner than
 that under city lighting.
 
 ```vega-lite
