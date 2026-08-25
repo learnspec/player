@@ -1288,3 +1288,145 @@ blockquote.callout-generic .callout-label {
   border-radius: 8px;
   box-shadow: none;
 }
+
+/* ── AnimMD step-reveal player (spec: learnspec/animmd) ──────────────────
+   Playback state classes are scoped to the player's own elements, never to
+   the SVG's renderer-minted instance id — that id changes on every render.
+   The scene sits on a fixed light plate in BOTH themes: Mermaid bakes its
+   own light-wash colours into the SVG, so a dark page must not bleed
+   through a diagram that cannot follow it. */
+.anim-player {
+  margin: 1.5rem 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-raised);
+  outline: none;
+  position: relative;
+}
+.anim-player:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.anim-stage {
+  background: #ffffff;
+  padding: 0.75rem 0.75rem 0.5rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.anim-stage .diagram {
+  margin: 0 auto;
+}
+
+/* Playback state (applied by AnimPlayer). */
+.anim-stage .am-target {
+  transition: opacity 420ms ease;
+}
+.anim-stage .am-hidden {
+  opacity: 0 !important;
+}
+.anim-stage svg.has-focus .am-target:not(.am-focused):not(.am-hidden) {
+  opacity: 0.18;
+}
+.anim-stage .am-pulse {
+  animation: am-pulse 1.15s cubic-bezier(0.4, 0, 0.2, 1) 2;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+@keyframes am-pulse {
+  0%, 100% { transform: scale(1); }
+  45% { transform: scale(1.05); }
+}
+
+/* Caption panel. `captions: overlay` (the default) pins it over the bottom
+   of the stage so the narration stays visible ON the diagram; the stage
+   reserves padding so the scene sits above it. `captions: below` keeps the
+   detached layout (base rules). Fixed light-ink colours on the overlay: it
+   sits on the light plate in both themes. */
+.anim-caption {
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  padding: 0.6rem 0.9rem 0.75rem;
+}
+.anim-player-overlay .anim-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(253, 253, 252, 0.94);
+  border-top-color: #e2e0e6;
+  color: #33313a;
+  backdrop-filter: blur(2px);
+}
+.anim-player-overlay .anim-stage {
+  padding-bottom: 7rem;
+}
+.anim-caption-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.3rem;
+}
+.anim-counter {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  background: var(--code-bg);
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+  white-space: nowrap;
+}
+.anim-player-overlay .anim-counter {
+  color: #6b6875;
+  background: #f4f3f6;
+}
+.anim-step-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  flex: 1;
+  min-width: 0;
+}
+.anim-player-overlay .anim-step-title {
+  color: #0e0d12;
+}
+.anim-caption-text {
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+.anim-player-overlay .anim-caption-text {
+  color: #33313a;
+}
+.anim-controls {
+  display: flex;
+  gap: 0.3rem;
+  margin-left: auto;
+}
+.anim-btn {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1;
+  color: #33313a;
+  background: #ffffff;
+  border: 1px solid #e2e0e6;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.anim-btn:hover:not(:disabled) {
+  border-color: #6d3bff;
+}
+.anim-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-stage .am-target {
+    transition: none;
+  }
+  .anim-stage .am-pulse {
+    animation: none;
+  }
+}

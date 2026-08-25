@@ -17,6 +17,14 @@ const TRACK_DEMO_URL = new URL(
   window.location.href,
 ).toString();
 
+/** Same public/-hosted shape as the track demo: the lesson references its
+ *  sibling `stock.diagram.md` (AnimMD companion script), so it needs a real
+ *  URL for relative resolution — it can't be inlined at build time. */
+const ANIM_DEMO_URL = new URL(
+  `${import.meta.env.BASE_URL}samples/anim-demo/water-cycle.learn.md`,
+  window.location.href,
+).toString();
+
 export function UrlLoader({ onLoad, onLoadSample, initialUrl }: UrlLoaderProps) {
   const handleSubmit = (event: SubmitEvent) => {
     event.preventDefault();
@@ -57,6 +65,9 @@ export function UrlLoader({ onLoad, onLoadSample, initialUrl }: UrlLoaderProps) 
         </button>
         <button type="button" class="btn btn-secondary" onClick={() => onLoad(TRACK_DEMO_URL)}>
           TrackMD demo
+        </button>
+        <button type="button" class="btn btn-secondary" onClick={() => onLoad(ANIM_DEMO_URL)}>
+          AnimMD demo
         </button>
       </div>
     </div>

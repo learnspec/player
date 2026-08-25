@@ -13,6 +13,7 @@
 // since `marked`'s GFM blockquote output is the simplest place to detect
 // the `[!type]` marker.
 
+import { parseFenceAttrs } from "./attrs";
 import { parseFrontmatter } from "./frontmatter";
 import { parseQuestionBlock, type QuizQuestion } from "./quizmd";
 
@@ -64,11 +65,25 @@ export interface UnsupportedSegment {
   source: string;
 }
 
+/** ```diagram ref:<slug>``` — resolved against the sibling stock.diagram.md. */
+export interface DiagramRefSegment {
+  type: "diagramref";
+  slug: string;
+}
+
+/** ```anim ref:<slug>``` — plays the stock entry's AnimMD companion script. */
+export interface AnimRefSegment {
+  type: "animref";
+  slug: string;
+}
+
 export type LearnSegment =
   | ProseSegment
   | ExampleSegment
   | QuizSegment
   | DiagramSegment
+  | DiagramRefSegment
+  | AnimRefSegment
   | UnsupportedSegment;
 
 export interface LearnDocument {
@@ -82,7 +97,7 @@ export interface LearnDocument {
 // Trailing attributes after the language word (e.g. ` ```quiz scored:true `,
 // ` ```example python title:"..." `) are matched but ignored — this player
 // doesn't act on them, it just needs to still recognize the fence.
-const FENCE_RE = /^(```+|~~~+)\s*([A-Za-z0-9_-]*)(?:\s+.*)?$/;
+const FENCE_RE = /^(```+|~~~+)\s*([A-Za-z0-9_-]*)((?:\s+.*)?)$/;
 const INLINE_QUIZ_QUESTION_RE = /^\s*\?\s*(.*)$/;
 
 /** Parses a full `.learn.md` document into an ordered list of segments. */
@@ -148,6 +163,23 @@ export function parseLearnMD(source: string): LearnDocument {
     } else if (DIAGRAM_KINDS.has(lang)) {
       flushProse();
       segments.push({ type: "diagram", kind: lang as DiagramKind, source: content });
+    } else if (lang === "diagram" || lang === "anim") {
+      // Stock references (DiagramMD §Slug references; AnimMD §Embedding):
+      // ```diagram ref:<slug>``` renders the stock entry, ```anim ref:<slug>```
+      // plays its AnimMD companion script. The slug may also sit in the fence
+      // body (a common authoring slip both reference implementations accept).
+      const attrs = parseFenceAttrs(fenceMatch[3] ?? "");
+      let ref = typeof attrs.ref === "string" ? attrs.ref : "";
+      if (!ref && content.trim()) {
+        const bodyAttrs = parseFenceAttrs(content.trim().replace(/\s+/g, " "));
+        if (typeof bodyAttrs.ref === "string") ref = bodyAttrs.ref;
+      }
+      flushProse();
+      if (ref) {
+        segments.push({ type: lang === "anim" ? "animref" : "diagramref", slug: ref });
+      } else {
+        segments.push({ type: "unsupported", lang, source: content });
+      }
     } else if (lang === "" ) {
       // Plain, unlabeled fence: keep as ordinary Markdown code block (prose).
       proseBuffer.push(fenceMatch[0], ...contentLines, fenceMarker);
@@ -178,7 +210,6 @@ const DEGRADED_LANGS = new Set([
   "vega",
   "svg",
   "abc",
-  "diagram",
 ]);
 
 function isKnownDegradedBlock(lang: string): boolean {

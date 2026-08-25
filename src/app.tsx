@@ -37,7 +37,7 @@ type AppState =
   | { view: "loading"; url: string; nav?: TrackNav }
   | { view: "error"; url: string; message: string; nav?: TrackNav }
   | { view: "quiz"; source: string; nav?: TrackNav }
-  | { view: "learn"; source: string; nav?: TrackNav }
+  | { view: "learn"; source: string; url?: string; nav?: TrackNav }
   | { view: "flash"; source: string; nav?: TrackNav }
   | { view: "nugget"; source: string; nav?: TrackNav }
   | { view: "doc"; source: string; kind: StepKind; label: string; nav?: TrackNav }
@@ -76,7 +76,9 @@ export function App() {
           ? urlFormat
           : detectFormatFromContent(content);
       setState(
-        format === "quiz" ? { view: "quiz", source: content } : { view: "learn", source: content },
+        format === "quiz"
+          ? { view: "quiz", source: content }
+          : { view: "learn", source: content, url },
       );
     } catch (err) {
       setState({
@@ -109,7 +111,7 @@ export function App() {
       if (step.kind === "quiz") {
         setState({ view: "quiz", source: content, nav });
       } else if (step.kind === "learn") {
-        setState({ view: "learn", source: content, nav });
+        setState({ view: "learn", source: content, url: target, nav });
       } else if (step.kind === "flash") {
         setState({ view: "flash", source: content, nav });
       } else if (step.kind === "nugget") {
@@ -253,7 +255,7 @@ function renderBody(
     }
     case "learn": {
       const doc = parseLearnMD(state.source);
-      return <LearnView doc={doc} krokiBaseUrl={krokiBaseUrl} />;
+      return <LearnView doc={doc} krokiBaseUrl={krokiBaseUrl} sourceUrl={state.url} />;
     }
     case "flash":
       return <FlashDeckView doc={parseFlashMD(state.source)} />;
