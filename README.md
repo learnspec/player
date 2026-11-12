@@ -177,6 +177,10 @@ samples/                   # demo .quiz.md / .learn.md files inlined into the bu
 public/samples/track-demo/ # multi-file TrackMD demo, served as static files
 ```
 
+## Maintainers
+
+This repository is part of the [LearnSpec](https://learnspec.org) suite, initiated and maintained by [memoneo](https://memoneo.app). Issues and pull requests are welcome.
+
 ## License
 
 MIT — see [LICENSE](./LICENSE).
